@@ -1,1 +1,1 @@
-# whisper-server
+# whisper-openai-api
