@@ -1,6 +1,6 @@
 services:  
   app:
-    image: ghcr.io/etalab-ia/whisper-openai-api:latest
+    image: ghcr.io/etalab-ia/whisper-openai-api/app:latest
     restart: always
     command: python3 app/main.py --model openai/whisper-large-v3
     ports:
