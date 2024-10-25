@@ -1,25 +1,20 @@
 import argparse
 from contextlib import asynccontextmanager
-from typing import Annotated
 import logging
-import uvicorn
+from typing import Annotated, Optional, Union
+
 from fastapi import FastAPI, Response, Security
 from security import check_api_key
 import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 from transformers.utils import is_flash_attn_2_available
-
-from typing import Optional, Union
-
-
-from app.schemas.models import Model, Models
-
+import uvicorn
 
 from app.config import APP_VERSION, TIMEOUT_KEEP_ALIVE
+from openai.types import Model, Models
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, default="openai/whisper-large-v3")
-parser.add_argument("--host", type=str, default="0.0.0.0")
 parser.add_argument("--port", type=int, default=8000)
 parser.add_argument("--debug", action="store_true")
 args = parser.parse_args()
@@ -64,6 +59,7 @@ async def lifespan(app: FastAPI):
 
     pipe.clear()
 
+
 # Setup FastAPI
 app = FastAPI(title="Whisper OpenAI API", version=APP_VERSION, licence_info={"name": "MIT License", "identifier": "MIT"}, lifespan=lifespan)
 
@@ -102,17 +98,12 @@ async def audio_transcriptions(api_key: Annotated[str, Security(check_api_key)],
 
     pass
 
-if __name__ == "__main__":
-    level = "DEBUG" if args.debug else "INFO"
-    logging.basicConfig(
-        format="%(asctime)s:%(levelname)s: %(message)s",
-        level=logging.getLevelName(level),
-    )
 
+if __name__ == "__main__":
     app.root_path = args.root_path
     uvicorn.run(
         app,
-        host=args.host,
+        host="0.0.0.0",
         port=args.port,
         log_level="debug" if args.debug else "info",
         timeout_keep_alive=TIMEOUT_KEEP_ALIVE,
