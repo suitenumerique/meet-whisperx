@@ -1,0 +1,41 @@
+[project]
+name = "whisper-openai-api"
+version = "1.0.0"
+description = "Whisper OpenAI API"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "transformers==4.46.0",
+    "accelerate==1.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff==0.6.5",
+    "pre-commit==3.6.2",
+]
+test = [
+    "pytest==8.3.3",
+]
+
+[tool.setuptools]
+py-modules = []
+
+[tool.ruff]
+line-length = 150
+
+[tool.ruff.lint]
+ignore = ["F403", "F841"] # import * and never used variables
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+known-first-party = ["config", "utils", "app"]
+forced-separate = ["tests"]
+
+[tool.ruff.lint.isort.sections]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.pytest.ini_options]
+addopts = "--exitfirst --log-cli-level=INFO"
+testpaths = ["app/tests"]
+minversion = "8.2.2"
