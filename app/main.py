@@ -1,25 +1,12 @@
-import argparse
-from contextlib import asynccontextmanager
 import logging
-from typing import Annotated, Optional, Union
 
-from fastapi import FastAPI, Response, Security, UploadFile, File
-from openai.types import Model, Models
-import torch
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
-from transformers.utils import is_flash_attn_2_available
 import uvicorn
+from fastapi import FastAPI
 
-from app.config import APP_VERSION, TIMEOUT_KEEP_ALIVE
-from app.schemas.audio import AudioTranscription, AudioTranscriptionVerbose
-from security import check_api_key
-
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, default="openai/whisper-large-v3")
-parser.add_argument("--port", type=int, default=8000)
-parser.add_argument("--debug", action="store_true")
-args = parser.parse_args()
+from app.endpoints import health, models, audio
+from app.utils.args import args
+from app.utils.config import APP_VERSION, TIMEOUT_KEEP_ALIVE
+from app.utils.lifespan import lifespan
 
 
 # Setup logging
@@ -29,83 +16,17 @@ level = logging.DEBUG if args.debug else logging.INFO
 logger.setLevel(level)
 
 
-# Local model
-pipe = {}
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
-
-    model = AutoModelForSpeechSeq2Seq.from_pretrained(
-        args.model,
-        torch_dtype=torch.float16,
-        low_cpu_mem_usage=True,
-        use_safetensors=True,
-    )
-    processor = AutoProcessor.from_pretrained(args.model)
-    model.to(device)
-
-    pipe["model"] = pipeline(
-        "automatic-speech-recognition",
-        model=model,
-        tokenizer=processor.tokenizer,
-        feature_extractor=processor.feature_extractor,
-        torch_dtype=torch_dtype,
-        device=device,
-        model_kwargs={"attn_implementation": "flash_attention_2"} if is_flash_attn_2_available() else {"attn_implementation": "sdpa"},
-    )
-
-    yield
-
-    pipe.clear()
-
-
 # Setup FastAPI
-app = FastAPI(title="Whisper OpenAI API", version=APP_VERSION, licence_info={"name": "MIT License", "identifier": "MIT"}, lifespan=lifespan)
+app = FastAPI(
+    title="Whisper OpenAI API", 
+    version=APP_VERSION, 
+    licence_info={"name": "MIT License", "identifier": "MIT"}, 
+    lifespan=lifespan
+)
 
-
-@app.get("/health", tags=["Monitoring"])
-def health(api_key: Annotated[str, Security(check_api_key)]):
-    """
-    Health check.
-    """
-
-    return Response(status_code=200)
-
-
-@app.get("/models/{model:path}", tags=["Models"])
-@app.get("/models", tags=["Models"])
-async def models(
-    api_key: Annotated[str, Security(check_api_key)], 
-    model: Optional[str] = None
-) -> Union[Models, Model]:
-    """
-    Model API similar to OpenAI's API.
-    See https://platform.openai.com/docs/api-reference/models/list for the API specification.
-    """
-
-    data = [Model(id=args.model)]
-
-    if model is not None:
-        return data[0]
-
-    return Models(data=data)
-
-
-@app.post("/audio/transcriptions", tags=["Audio"])
-async def audio_transcriptions(
-    api_key: Annotated[str, Security(check_api_key)], 
-    file: UploadFile = File(...)
-) -> Union[AudioTranscription, AudioTranscriptionVerbose]:
-    """
-    Audio transcriptions API similar to OpenAI's API.
-    See https://platform.openai.com/docs/api-reference/audio/create-transcription for the API specification.
-    """
-    response = pipe["model"](file,  generate_kwargs={"language": "fr", "temperature": 0.9}, return_timestamps=True)  
-
-    return AudioTranscriptionVerbose(**response)
+app.include_router(health.router)
+app.include_router(models.router)
+app.include_router(audio.router)
 
 
 if __name__ == "__main__":

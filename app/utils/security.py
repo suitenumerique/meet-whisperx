@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from config import API_KEY
+from app.utils.config import API_KEY
+
 
 auth_scheme = HTTPBearer(scheme_name="API key")
 

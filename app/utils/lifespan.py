@@ -3,6 +3,10 @@ from contextlib import asynccontextmanager
 import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
 
+from app.utils.args import args
+
+
+pipe = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
