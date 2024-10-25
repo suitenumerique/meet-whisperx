@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+RUN apt-get update && \
+    apt-get install -y python3-pip python3-dev curl && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --gid 1100 whisper
 RUN useradd --home /home/whisper --gid 1100 --uid 1100 whisper 
 USER whisper

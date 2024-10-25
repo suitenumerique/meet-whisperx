@@ -1,0 +1,21 @@
+services:  
+  app:
+    image: ghcr.io/etalab-ia/whisper-openai-api:latest
+    restart: always
+    command: python3 app/main.py --model openai/whisper-large-v3
+    ports:
+      - 8000
+    volumes:
+      - ${MODELS_CACHE_DIR:-"/data/models"}:/home/whisper/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 120s
+      timeout: 5s
+      retries: 10
