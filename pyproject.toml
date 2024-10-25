@@ -9,6 +9,9 @@ dependencies = [
     "accelerate==1.0.1",
     "openai==1.43.0",
     "uvicorn==0.32.0",
+    "fastapi==0.115.3",
+    "pydantic==2.9.2",
+    "python-multipart==0.0.12",
 ]
 
 [project.optional-dependencies]
@@ -31,7 +34,7 @@ ignore = ["F403", "F841"] # import * and never used variables
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
-known-first-party = ["config", "utils", "app"]
+known-first-party = ["utils", "schemas", "endpoints"]
 forced-separate = ["tests"]
 
 [tool.ruff.lint.isort.sections]

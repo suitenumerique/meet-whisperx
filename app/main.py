@@ -3,30 +3,23 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 
-from app.endpoints import health, models, audio
-from app.utils.args import args
-from app.utils.config import APP_VERSION, TIMEOUT_KEEP_ALIVE
-from app.utils.lifespan import lifespan
+from endpoints import monitoring, models, audio
+from utils.args import args
+from utils.config import APP_VERSION, TIMEOUT_KEEP_ALIVE
+from utils.lifespan import lifespan
 
 
 # Setup logging
-logging.basicConfig(format="%(levelname)s:%(asctime)s:%(name)s: %(message)s", level=logging.INFO)
-logger = logging.getLogger(__name__)
 level = logging.DEBUG if args.debug else logging.INFO
-logger.setLevel(level)
+logging.basicConfig(format="%(levelname)s:%(asctime)s:%(name)s: %(message)s", level=level)
 
 
 # Setup FastAPI
-app = FastAPI(
-    title="Whisper OpenAI API", 
-    version=APP_VERSION, 
-    licence_info={"name": "MIT License", "identifier": "MIT"}, 
-    lifespan=lifespan
-)
+app = FastAPI(title="Whisper OpenAI API", version=APP_VERSION, licence_info={"name": "MIT License", "identifier": "MIT"}, lifespan=lifespan)
 
-app.include_router(health.router)
-app.include_router(models.router)
-app.include_router(audio.router)
+app.include_router(monitoring.router, tags=["Monitoring"])
+app.include_router(models.router, tags=["Model"], prefix="/v1")
+app.include_router(audio.router, tags=["Audio"], prefix="/v1")
 
 
 if __name__ == "__main__":

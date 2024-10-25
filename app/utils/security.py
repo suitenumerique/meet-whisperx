@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.utils.config import API_KEY
-
+from utils.config import API_KEY
+from utils.exceptions import InvalidAuthenticationSchemeException, InvalidAPIKeyException
 
 auth_scheme = HTTPBearer(scheme_name="API key")
 
@@ -18,8 +18,8 @@ else:
 
     def check_api_key(api_key: Annotated[HTTPAuthorizationCredentials, Depends(auth_scheme)]):
         if api_key.scheme != "Bearer":
-            raise HTTPException(status_code=403, detail="Invalid authentication scheme")
+            raise InvalidAuthenticationSchemeException()
         if api_key.credentials != API_KEY:
-            raise HTTPException(status_code=403, detail="Unauthorized")
+            raise InvalidAPIKeyException()
 
         return api_key.credentials

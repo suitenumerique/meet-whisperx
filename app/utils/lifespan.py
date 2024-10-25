@@ -1,12 +1,14 @@
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
 import torch
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+from transformers.utils import is_flash_attn_2_available
 
-from app.utils.args import args
+from utils.args import args
 
+pipelines = {}
 
-pipe = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,7 +24,7 @@ async def lifespan(app: FastAPI):
     processor = AutoProcessor.from_pretrained(args.model)
     model.to(device)
 
-    pipe["model"] = pipeline(
+    pipelines[args.model] = pipeline(
         "automatic-speech-recognition",
         model=model,
         tokenizer=processor.tokenizer,
@@ -34,4 +36,4 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    pipe.clear()
+    pipelines.clear()
