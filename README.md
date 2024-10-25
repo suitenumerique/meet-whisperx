@@ -1,5 +1,14 @@
 # Whisper OpenAI API
 
+## Contributing
+
+```bash
+pip install .
+```
+
+```bash
+python app/main.py
+```
 
 ## Environment variables
 

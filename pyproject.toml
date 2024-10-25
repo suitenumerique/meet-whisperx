@@ -8,6 +8,7 @@ dependencies = [
     "transformers==4.46.0",
     "accelerate==1.0.1",
     "openai==1.43.0",
+    "uvicorn==0.32.0",
 ]
 
 [project.optional-dependencies]
