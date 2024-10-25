@@ -3,15 +3,17 @@ from contextlib import asynccontextmanager
 import logging
 from typing import Annotated, Optional, Union
 
-from fastapi import FastAPI, Response, Security
-from security import check_api_key
+from fastapi import FastAPI, Response, Security, UploadFile, File
+from openai.types import Model, Models
 import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 from transformers.utils import is_flash_attn_2_available
 import uvicorn
 
 from app.config import APP_VERSION, TIMEOUT_KEEP_ALIVE
-from openai.types import Model, Models
+from app.schemas.audio import AudioTranscription, AudioTranscriptionVerbose
+from security import check_api_key
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, default="openai/whisper-large-v3")
@@ -75,7 +77,10 @@ def health(api_key: Annotated[str, Security(check_api_key)]):
 
 @app.get("/models/{model:path}", tags=["Models"])
 @app.get("/models", tags=["Models"])
-async def models(api_key: Annotated[str, Security(check_api_key)], model: Optional[str] = None) -> Union[Models, Model]:
+async def models(
+    api_key: Annotated[str, Security(check_api_key)], 
+    model: Optional[str] = None
+) -> Union[Models, Model]:
     """
     Model API similar to OpenAI's API.
     See https://platform.openai.com/docs/api-reference/models/list for the API specification.
@@ -90,13 +95,17 @@ async def models(api_key: Annotated[str, Security(check_api_key)], model: Option
 
 
 @app.post("/audio/transcriptions", tags=["Audio"])
-async def audio_transcriptions(api_key: Annotated[str, Security(check_api_key)], file: UploadFile = File(...)) -> Transcription:
+async def audio_transcriptions(
+    api_key: Annotated[str, Security(check_api_key)], 
+    file: UploadFile = File(...)
+) -> Union[AudioTranscription, AudioTranscriptionVerbose]:
     """
     Audio transcriptions API similar to OpenAI's API.
     See https://platform.openai.com/docs/api-reference/audio/create-transcription for the API specification.
     """
+    response = pipe["model"](file,  generate_kwargs={"language": "fr", "temperature": 0.9}, return_timestamps=True)  
 
-    pass
+    return AudioTranscriptionVerbose(**response)
 
 
 if __name__ == "__main__":
