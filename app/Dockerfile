@@ -11,11 +11,14 @@ RUN apt-get update -y && \
 
 RUN groupadd --gid 1100 whisper
 RUN useradd --home /home/whisper --gid 1100 --uid 1100 whisper 
-USER whisper
-ENV PATH="/home/whisper/.local/bin:${PATH}"
 
+USER whisper
 WORKDIR /home/whisper
-ADD ./pyproject.toml ./pyproject.toml
-RUN pip install .
-ADD ./app /home/whisper/app
+
+ENV PATH="/home/whisper/.local/bin:${PATH}"
 ENV PYTHONPATH="/home/whisper/app:${PYTHONPATH}"
+
+ADD ./pyproject.toml ./pyproject.toml
+RUN pip install --upgrade pip && pip install .
+ADD ./app /home/whisper/app
+

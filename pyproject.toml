@@ -2,7 +2,7 @@
 name = "whisper-openai-api"
 version = "1.0.0"
 description = "Whisper OpenAI API"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
     "transformers==4.46.0",
