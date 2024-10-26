@@ -6,13 +6,25 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build to ${{ github.ref_name }}/${{ github.sha }}
+  build-and-push:
+    name: Build and push to ${{ github.ref_name }}/${{ github.sha }}
     runs-on: ubuntu-latest
     env:
       IMAGE_NAME: ghcr.io/${{ github.repository }}/app
       IMAGE_TAG: ${{ github.sha }}
     steps:
+      # Cuda image is large, so we need to free up some space before building
+      - name: Free Disk Space 
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
