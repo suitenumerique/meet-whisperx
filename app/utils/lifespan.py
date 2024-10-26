@@ -20,6 +20,8 @@ async def lifespan(app: FastAPI):
         torch_dtype=torch.float16,
         low_cpu_mem_usage=True,
         use_safetensors=True,
+        force_download=args.force_download,
+        token=args.hf_token,
     )
     processor = AutoProcessor.from_pretrained(args.model)
     model.to(device)
