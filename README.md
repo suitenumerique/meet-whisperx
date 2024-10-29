@@ -2,12 +2,19 @@
 
 ## Contributing
 
+### Local development
 ```bash
 pip install .
 ```
 
 ```bash
 python app/main.py
+```
+
+### Docker development
+
+```bash
+export MODELS_CACHE_DIR="." && docker compose up
 ```
 
 ## Environment variables
