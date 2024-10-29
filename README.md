@@ -14,7 +14,7 @@ python app/main.py
 ### Docker development
 
 ```bash
-export MODELS_CACHE_DIR="." && docker compose up
+export MODELS_CACHE_DIR="." && docker compose up --pull always
 ```
 
 ## Environment variables
