@@ -1,49 +1,35 @@
-from typing import Literal, Optional
-import json
+from typing import List
 
 from openai.types.audio import Transcription
-from pydantic import BaseModel, Field, field_validator, model_validator
-from transformers.models.whisper.tokenization_whisper import TO_LANGUAGE_CODE, LANGUAGES
-
-from utils.args import args
-from utils.exceptions import ModelNotFoundException
+from pydantic import BaseModel
 
 
-SUPPORTED_LANGUAGES = set(list(LANGUAGES.keys()) + list(TO_LANGUAGE_CODE.keys()))
-
-
-class Transcription(Transcription):
+class AudioTranscription(Transcription):
     pass
 
 
-class TranscriptionRequest(BaseModel):
-    model: str = Field(default=args.model)
-    language: str= Field(default="en")
-    response_format: Literal["text", "json"] = Field(default="json")
-    temperature: Optional[float] = Field(default=None, ge=0, le=1)
+class Word(BaseModel):
+    word: str
+    start: float
+    end: float
 
 
-    @field_validator("language")
-    @classmethod
-    def validate_language(cls, value):
-        if value not in SUPPORTED_LANGUAGES:
-            raise ValueError(f"Language {value} not supported")
-        return value
-    
-    @field_validator("model")
-    @classmethod
-    def validate_model(cls, model):
-        if model != args.model:
-            raise ModelNotFoundException()
-        return model
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_to_json(cls, value):
-        if isinstance(value, str):
-            return cls(**json.loads(value))
-        return value
-
-
-class Transcription(BaseModel):
+class Segment(BaseModel):
+    id: int
+    seek: int
+    start: float
+    end: float
     text: str
+    tokens: List[int]
+    temperature: float
+    avg_logprob: float
+    compression_ratio: float
+    no_speech_prob: float
+
+
+class AudioTranscriptionVerbose(AudioTranscription):
+    language: str
+    duration: float
+    text: str
+    words: List[Word]
+    segments: List[Segment]

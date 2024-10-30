@@ -6,6 +6,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from utils.config import API_KEY
 from utils.exceptions import InvalidAuthenticationSchemeException, InvalidAPIKeyException
 
+
 auth_scheme = HTTPBearer(scheme_name="API key")
 
 if not API_KEY:
