@@ -7,8 +7,9 @@
 pip install .
 ```
 
+Run the server on port 8010 (avoid conflict with the default ports 8000, 8001... with other services)
 ```bash
-python app/main.py
+python app/main.py --port 8010 --reload
 ```
 
 ### Docker development

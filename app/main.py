@@ -25,9 +25,10 @@ app.include_router(audio.router, tags=["Audio"], prefix="/v1")
 if __name__ == "__main__":
     app.root_path = args.root_path
     uvicorn.run(
-        app,
+        'main:app',
         host="0.0.0.0",
         port=args.port,
         log_level="debug" if args.debug else "info",
+        reload=args.reload,
         timeout_keep_alive=TIMEOUT_KEEP_ALIVE,
     )
