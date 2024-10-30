@@ -41,7 +41,14 @@ async def audio_transcriptions(
 
     file = await file.read()
     result = pipelines[model](
-        file, generate_kwargs={"language": language, "temperature": temperature}, return_timestamps=True
+        file, 
+        generate_kwargs={
+            "forced_decoder_ids": None,
+            "input_features": True,
+            "language": language, 
+            "temperature": temperature,   
+        }, 
+        return_timestamps=True
     )
 
     if response_format == "text":
