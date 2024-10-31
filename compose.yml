@@ -4,9 +4,9 @@ services:
     restart: always
     command: python3 app/main.py --model openai/whisper-large-v3
     ports:
-      - 8000
+      - 8010:8000
     volumes:
-      - ${MODELS_CACHE_DIR:-"/data/models"}:/home/whisper/.cache/huggingface
+      - ${MODELS_CACHE_DIR:-"/data/models"}:/home/whisper/.cache/huggingface:rw
     deploy:
       resources:
         reservations:
