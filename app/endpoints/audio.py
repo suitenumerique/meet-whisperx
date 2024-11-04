@@ -2,14 +2,13 @@ from typing import List, Literal
 
 from fastapi import APIRouter, File, Form, Request, Security, UploadFile
 from fastapi.responses import PlainTextResponse
-from transformers.models.whisper.tokenization_whisper import TO_LANGUAGE_CODE, LANGUAGES
+from transformers.models.whisper.tokenization_whisper import LANGUAGES, TO_LANGUAGE_CODE
 
 from schemas.audio import AudioTranscription, AudioTranscriptionVerbose
 from utils.args import args
 from utils.exceptions import ModelNotFoundException
 from utils.lifespan import pipelines
 from utils.security import check_api_key
-
 
 router = APIRouter()
 
@@ -21,34 +20,31 @@ async def audio_transcriptions(
     request: Request,
     file: UploadFile = File(...),
     model: str = Form(args.model),
-    language: str = Form("en"),
-    prompt: str = Form(None), # TODO: implement
-    response_format: Literal["text", "json"] = Form("json"),
+    language: Literal[tuple(SUPPORTED_LANGUAGES)] = Form("en"),
+    prompt: str = Form(None),  # TODO: implement
+    response_format: Literal["text", "json"] = Form("json"),  # @TODO: implement stt and verbose_json
     temperature: float = Form(0),
-    timestamp_granularities: List[str] = Form(alias="timestamp_granularities[]", default=["segment"]), # TODO: implement
-    api_key=Security(check_api_key)
+    timestamp_granularities: List[str] = Form(alias="timestamp_granularities[]", default=["segment"]),  # @TODO: implement
+    api_key=Security(check_api_key),
 ) -> AudioTranscription | AudioTranscriptionVerbose:
     """
     Audio transcriptions API similar to OpenAI's API.
     See https://platform.openai.com/docs/api-reference/audio/create-transcription for the API specification.
     """
-    
+
     if model != args.model:
         raise ModelNotFoundException()
-    
-    if language not in SUPPORTED_LANGUAGES:
-        raise ValueError(f"Language {language} not supported")
 
     file = await file.read()
     result = pipelines[model](
-        file, 
+        file,
         generate_kwargs={
             "forced_decoder_ids": None,
             "input_features": True,
-            "language": language, 
-            "temperature": temperature,   
-        }, 
-        return_timestamps=True
+            "language": language,
+            "temperature": temperature,
+        },
+        return_timestamps=True,
     )
 
     if response_format == "text":
