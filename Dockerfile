@@ -17,6 +17,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
+    git \
     build-essential && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -24,9 +25,14 @@ RUN apt-get update && \
 WORKDIR /builder
 COPY . /builder
 
+
 # Install Python dependencies
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install --no-cache-dir .
+
+# wip try installing flash attn
+RUN python3 -m pip install packaging ninja
+RUN python3 -m pip install flash-attn --no-build-isolation
 
 
 FROM base AS core
