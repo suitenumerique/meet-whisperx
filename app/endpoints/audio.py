@@ -1,5 +1,8 @@
 from typing import List, Literal
 
+import logging
+import time
+
 from fastapi import APIRouter, File, Form, Request, Security, UploadFile
 from fastapi.responses import PlainTextResponse
 from transformers.models.whisper.tokenization_whisper import LANGUAGES, TO_LANGUAGE_CODE
@@ -14,6 +17,7 @@ router = APIRouter()
 
 SUPPORTED_LANGUAGES = set(list(LANGUAGES.keys()) + list(TO_LANGUAGE_CODE.keys()))
 
+logger = logging.getLogger("api")
 
 @router.post("/audio/transcriptions")
 async def audio_transcriptions(
@@ -36,6 +40,8 @@ async def audio_transcriptions(
         raise ModelNotFoundException()
 
     file = await file.read()
+
+    inference_start = time.perf_counter()
     result = pipelines[model](
         file,
         generate_kwargs={
@@ -46,6 +52,10 @@ async def audio_transcriptions(
         },
         return_timestamps=True,
     )
+    inference_time = time.perf_counter() - inference_start
+
+    logger.info("Model inference time: %.3fs", inference_time)
+    logger.info("Audio length: %s bytes", len(file))
 
     if response_format == "text":
         return PlainTextResponse(result["text"])

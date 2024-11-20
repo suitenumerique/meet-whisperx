@@ -57,5 +57,6 @@ USER whisperuser
 
 WORKDIR /app
 COPY --chown=appuser:appuser ./app /app
+COPY  ./logging-config.yaml /app/logging-config.yaml
 
-CMD ["python3", "main.py", "--model", "openai/whisper-large-v3"]
+CMD ["python3", "main.py", "--model", "openai/whisper-large-v3", "--logging-config", "logging-config.yaml"]
