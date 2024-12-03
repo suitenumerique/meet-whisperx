@@ -28,7 +28,7 @@ if __name__ == "__main__":
         'main:app',
         host="0.0.0.0",
         port=args.port,
-        log_level="debug" if args.debug else "info",
+        log_level="debug",
         log_config=args.logging_config,
         reload=args.reload,
         timeout_keep_alive=TIMEOUT_KEEP_ALIVE,

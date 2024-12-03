@@ -36,26 +36,37 @@ async def audio_transcriptions(
     See https://platform.openai.com/docs/api-reference/audio/create-transcription for the API specification.
     """
 
+    logger.info("Request received")
+
     if model != args.model:
         raise ModelNotFoundException()
 
+    logger.info("Reading file …")
+
+    reading_start = time.perf_counter()
     file = await file.read()
+    reading_time = time.perf_counter() - reading_start
+    logger.info("Reading time: %.3fs", reading_time)
+
+    logger.info("Starting transcription …")
 
     inference_start = time.perf_counter()
     result = pipelines[model](
-        file,
-        generate_kwargs={
-            "forced_decoder_ids": None,
-            "input_features": True,
-            "language": language,
-            "temperature": temperature,
-        },
-        return_timestamps=True,
+        file
+        # generate_kwargs={
+        #     "forced_decoder_ids": None,
+        #     "input_features": True,
+        #     "language": language,
+        #     "temperature": temperature,
+        # },
+        # return_timestamps=True,
     )
     inference_time = time.perf_counter() - inference_start
 
     logger.info("Model inference time: %.3fs", inference_time)
     logger.info("Audio length: %s bytes", len(file))
+
+    logger.info("Transcription: %s", result["text"])
 
     if response_format == "text":
         return PlainTextResponse(result["text"])

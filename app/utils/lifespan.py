@@ -15,7 +15,7 @@ pipelines = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
     logger.info("Device: %s", device)
@@ -24,14 +24,15 @@ async def lifespan(app: FastAPI):
 
     model = AutoModelForSpeechSeq2Seq.from_pretrained(
         args.model,
-        torch_dtype=torch.float16,
+        torch_dtype=torch_dtype,
         low_cpu_mem_usage=True,
-        use_safetensors=True,
-        force_download=args.force_download,
-        token=args.hf_token,
-    )
+        # use_safetensors=True,
+        # force_download=args.force_download,
+        # token=args.hf_token,
+        attn_implementation="flash_attention_2" if is_flash_attn_2_available() else "sdpa"
+    ).to(device)
+
     processor = AutoProcessor.from_pretrained(args.model)
-    model.to(device)
 
     logger.info("Tokenizer: %s", processor.tokenizer)
     logger.info("Feature extractor: %s", processor.feature_extractor)
@@ -43,7 +44,8 @@ async def lifespan(app: FastAPI):
         feature_extractor=processor.feature_extractor,
         torch_dtype=torch_dtype,
         device=device,
-        model_kwargs={"attn_implementation": "flash_attention_2"} if is_flash_attn_2_available() else {"attn_implementation": "sdpa"},
+        chunk_length_s=30,
+        batch_size=24,
     )
 
     yield
