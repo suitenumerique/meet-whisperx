@@ -8,8 +8,8 @@ class Word(BaseModel):
     word: str
     start: Optional[float] = None
     end: Optional[float] = None
-    score: float
-    speaker: Optional[int] = None
+    score: Optional[float] = None
+    speaker: Optional[str] = None
 
 
 class Segment(BaseModel):
@@ -19,7 +19,7 @@ class Segment(BaseModel):
     end: float
     text: str
     words: List[Word]
-    speaker: Optional[int] = None
+    speaker: Optional[str] = None
 
 
 class AudioTranscription(BaseModel):

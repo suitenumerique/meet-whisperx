@@ -34,11 +34,10 @@ async def audio_transcriptions(
     if model != args.model:
         raise ModelNotFoundException()
 
-    file = await file.read()
-
     with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
         temp_file_path = temp_file.name
-        shutil.copyfileobj(file.file, temp_file)
+        content = await file.read()
+        temp_file.write(content)
 
     audio = whisperx.load_audio(temp_file_path)
     os.remove(temp_file_path)
