@@ -1,35 +1,38 @@
-from typing import List
-
-from openai.types.audio import Transcription
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 
 
-class AudioTranscription(Transcription):
-    pass
-
-
 class Word(BaseModel):
+    """Represents a single word in the transcription"""
+
     word: str
-    start: float
-    end: float
+    start: Optional[float] = None
+    end: Optional[float] = None
+    score: float
+    speaker: Optional[int] = None
 
 
 class Segment(BaseModel):
-    id: int
-    seek: int
+    """Represents a segment of transcribed audio"""
+
     start: float
     end: float
     text: str
-    tokens: List[int]
-    temperature: float
-    avg_logprob: float
-    compression_ratio: float
-    no_speech_prob: float
+    words: List[Word]
+    speaker: Optional[int] = None
+
+
+class AudioTranscription(BaseModel):
+    """Base audio transcription model"""
+
+    segments: List[Segment]
+    word_segments: Optional[List[Dict[str, Any]]] = None
 
 
 class AudioTranscriptionVerbose(AudioTranscription):
+    """Extended audio transcription model with additional details"""
+
     language: str
     duration: float
     text: str
     words: List[Word]
-    segments: List[Segment]

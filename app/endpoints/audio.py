@@ -1,30 +1,29 @@
-from typing import List, Literal
+from fastapi import APIRouter, File, Form, Request, Security, UploadFile, Depends
 
-from fastapi import APIRouter, File, Form, Request, Security, UploadFile
-from fastapi.responses import PlainTextResponse
-from transformers.models.whisper.tokenization_whisper import LANGUAGES, TO_LANGUAGE_CODE
+import whisperx
 
 from schemas.audio import AudioTranscription, AudioTranscriptionVerbose
 from utils.args import args
 from utils.exceptions import ModelNotFoundException
 from utils.lifespan import pipelines
 from utils.security import check_api_key
+from utils.config import get_settings, Settings, get_device
+from typing import Annotated
+
+import tempfile
+import os
+import shutil
+
 
 router = APIRouter()
-
-SUPPORTED_LANGUAGES = set(list(LANGUAGES.keys()) + list(TO_LANGUAGE_CODE.keys()))
 
 
 @router.post("/audio/transcriptions")
 async def audio_transcriptions(
     request: Request,
+    settings: Annotated[Settings, Depends(get_settings)],
     file: UploadFile = File(...),
     model: str = Form(args.model),
-    language: Literal[tuple(SUPPORTED_LANGUAGES)] = Form("en"),
-    prompt: str = Form(None),  # TODO: implement
-    response_format: Literal["text", "json"] = Form("json"),  # @TODO: implement stt and verbose_json
-    temperature: float = Form(0),
-    timestamp_granularities: List[str] = Form(alias="timestamp_granularities[]", default=["segment"]),  # @TODO: implement
     api_key=Security(check_api_key),
 ) -> AudioTranscription | AudioTranscriptionVerbose:
     """
@@ -36,18 +35,30 @@ async def audio_transcriptions(
         raise ModelNotFoundException()
 
     file = await file.read()
-    result = pipelines[model](
-        file,
-        generate_kwargs={
-            "forced_decoder_ids": None,
-            "input_features": True,
-            "language": language,
-            "temperature": temperature,
-        },
-        return_timestamps=True,
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
+        temp_file_path = temp_file.name
+        shutil.copyfileobj(file.file, temp_file)
+
+    audio = whisperx.load_audio(temp_file_path)
+    os.remove(temp_file_path)
+
+    result = pipelines[args.model].transcribe(audio, batch_size=settings.batch_size)
+
+    device = get_device()
+    model_alignment, metadata = whisperx.load_align_model(language_code=result["language"], device=device)
+    result = whisperx.align(
+        result["segments"],
+        model_alignment,
+        metadata,
+        audio,
+        device,
+        interpolate_method=settings.interpolate_method,
+        return_char_alignments=settings.return_char_alignments,
     )
 
-    if response_format == "text":
-        return PlainTextResponse(result["text"])
+    diarize_segments = pipelines["diarize_model"](audio)
+
+    result = whisperx.assign_word_speakers(diarize_segments, result, fill_nearest=settings.fill_nearest)
 
     return AudioTranscription(**result)

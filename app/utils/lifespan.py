@@ -1,40 +1,23 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-import torch
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
-from transformers.utils import is_flash_attn_2_available
+import whisperx
 
 from utils.args import args
+from utils.config import get_device, get_dtype, get_settings
 
 pipelines = {}
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+    device = get_device()
+    torch_dtype = get_dtype()
 
-    model = AutoModelForSpeechSeq2Seq.from_pretrained(
-        args.model,
-        torch_dtype=torch.float16,
-        low_cpu_mem_usage=True,
-        use_safetensors=True,
-        force_download=args.force_download,
-        token=args.hf_token,
-    )
-    processor = AutoProcessor.from_pretrained(args.model)
-    model.to(device)
+    settings = get_settings()
 
-    pipelines[args.model] = pipeline(
-        "automatic-speech-recognition",
-        model=model,
-        tokenizer=processor.tokenizer,
-        feature_extractor=processor.feature_extractor,
-        torch_dtype=torch_dtype,
-        device=device,
-        model_kwargs={"attn_implementation": "flash_attention_2"} if is_flash_attn_2_available() else {"attn_implementation": "sdpa"},
-    )
+    pipelines[args.model] = whisperx.load_model(args.model, device, compute_type=torch_dtype)
+    pipelines["diarize_model"] = whisperx.DiarizationPipeline(use_auth_token=settings.hf_token, device=device)
 
     yield
 
