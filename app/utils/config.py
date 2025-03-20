@@ -1,5 +1,37 @@
-import os
+import torch
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from functools import lru_cache
 
-APP_VERSION = os.getenv("APP_VERSION", "0.0.0")
-API_KEY = os.getenv("API_KEY")
-TIMEOUT_KEEP_ALIVE = int(os.getenv("TIMEOUT_KEEP_ALIVE", 60))
+
+class Settings(BaseSettings):
+    """Bootstrap settings"""
+
+    app_name: str = "whisperx-api"
+    app_version: str = "0.0.0"
+    batch_size: int = 16
+    api_key: str
+    hf_token: str
+    timeout_keep_alive: int = 60
+    return_char_alignments: bool = False
+    interpolate_method: str = "nearest"
+    fill_nearest: bool = False
+
+    model_config = SettingsConfigDict(env_file=".env")
+
+
+@lru_cache
+def get_settings():
+    return Settings()
+
+
+settings = get_settings()
+
+
+@lru_cache
+def get_device():
+    return "cuda" if torch.cuda.is_available() else "cpu"
+
+
+@lru_cache
+def get_dtype():
+    return "float16" if torch.cuda.is_available() else torch.float32
