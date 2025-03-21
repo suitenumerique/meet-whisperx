@@ -49,16 +49,19 @@ RUN groupadd -r whisperuser && \
 # wip not sure about this part
 ARG HF_HOME=/data/models
 ENV HF_HOME=${HF_HOME}
+ENV TRANSFORMERS_CACHE=${HF_HOME}
 
 # wip not sure about this part
 RUN mkdir -p ${HF_HOME} && \
     chown -R whisperuser:whisperuser ${HF_HOME} && \
-    chmod -R 766 ${HF_HOME}
-
-USER whisperuser
+    chown -R whisperuser:whisperuser /home/whisperuser && \
+    chmod -R 755 ${HF_HOME} && \
+    chmod -R 755 /home/whisperuser
 
 WORKDIR /app
-COPY --chown=appuser:appuser ./app /app
-COPY  ./logging-config.yaml /app/logging-config.yaml
+COPY --chown=whisperuser:whisperuser ./app /app
+COPY --chown=whisperuser:whisperuser ./logging-config.yaml /app/logging-config.yaml
+
+USER whisperuser
 
 CMD ["python3", "main.py", "--model", "large-v2", "--logging-config", "logging-config.yaml"]
