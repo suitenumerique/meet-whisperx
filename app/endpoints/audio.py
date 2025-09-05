@@ -10,6 +10,8 @@ from fastapi import (
 )
 
 import whisperx
+import logging
+import time
 
 from schemas.audio import AudioTranscription, AudioTranscriptionVerbose
 from utils.args import args
@@ -22,6 +24,7 @@ from typing import Annotated, Optional
 import tempfile
 import os
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -41,6 +44,7 @@ async def audio_transcriptions(
     /!\ Note: This endpoint is **not** OpenAI API compatible.
     The response format does not follow the OpenAI specification.
     """
+    logger.info("Request received")
 
     if language is not None and language not in whisperx.utils.LANGUAGES:
         raise HTTPException(
@@ -50,6 +54,8 @@ async def audio_transcriptions(
     if model != args.model:
         raise ModelNotFoundException()
 
+    logger.info("Reading file …")
+    reading_start = time.perf_counter()
     with tempfile.NamedTemporaryFile(
         delete=False, suffix=os.path.splitext(file.filename)[1]
     ) as temp_file:
@@ -57,12 +63,18 @@ async def audio_transcriptions(
         content = await file.read()
         temp_file.write(content)
 
+    reading_time = time.perf_counter() - reading_start
+    logger.info("Reading time: %.3fs", reading_time)
+
+    logger.info("Starting transcription …")
     audio = whisperx.load_audio(temp_file_path)
     os.remove(temp_file_path)
 
     result = pipelines[args.model].transcribe(
         audio, batch_size=settings.batch_size, language=language
     )
+
+    logger.info("Transcription done.")
 
     device = get_device()
     model_alignment, metadata = whisperx.load_align_model(
@@ -78,10 +90,13 @@ async def audio_transcriptions(
         return_char_alignments=settings.return_char_alignments,
     )
 
+    logger.info("Diarization …")
     diarize_segments = pipelines["diarize_model"](audio)
 
     result = whisperx.assign_word_speakers(
         diarize_segments, result, fill_nearest=settings.fill_nearest
     )
+
+    logger.info("Diarization done.")
 
     return AudioTranscription(**result)
