@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, Form, Request, Security, UploadFile, Depends
+from fastapi import APIRouter, File, Form, Request, Security, UploadFile, Depends, HTTPException
 
 import whisperx
 
@@ -8,7 +8,7 @@ from utils.exceptions import ModelNotFoundException
 from utils.lifespan import pipelines
 from utils.security import check_api_key
 from utils.config import get_settings, Settings, get_device
-from typing import Annotated
+from typing import Annotated, Optional
 
 import tempfile
 import os
@@ -24,6 +24,7 @@ async def audio_transcriptions(
     file: UploadFile = File(...),
     model: str = Form(args.model),
     api_key=Security(check_api_key),
+    language: Optional[str] = None,
 ) -> AudioTranscription | AudioTranscriptionVerbose:
     """
     Audio transcription API (custom implementation).
@@ -31,6 +32,11 @@ async def audio_transcriptions(
     /!\ Note: This endpoint is **not** OpenAI API compatible.
     The response format does not follow the OpenAI specification.
     """
+
+    if language is not None and language not in whisperx.utils.LANGUAGES:
+        raise HTTPException(
+            status_code=400, detail=f"Unsupported language '{language}'."
+        )
 
     if model != args.model:
         raise ModelNotFoundException()
@@ -43,7 +49,7 @@ async def audio_transcriptions(
     audio = whisperx.load_audio(temp_file_path)
     os.remove(temp_file_path)
 
-    result = pipelines[args.model].transcribe(audio, batch_size=settings.batch_size)
+    result = pipelines[args.model].transcribe(audio, batch_size=settings.batch_size, language=language)
 
     device = get_device()
     model_alignment, metadata = whisperx.load_align_model(language_code=result["language"], device=device)
