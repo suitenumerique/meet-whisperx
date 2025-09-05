@@ -11,9 +11,9 @@ from utils.config import get_settings, Settings, settings
 
 # Setup FastAPI
 app = FastAPI(
-    title="Whisper OpenAI API",
+    title="LaSuite Meet WhisperX",
     version=settings.app_version,
-    licence_info={"name": "MIT License", "identifier": "MIT"},
+    license_info={"name": "MIT License", "identifier": "MIT"},
     lifespan=lifespan,
 )
 
