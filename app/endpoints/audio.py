@@ -26,8 +26,10 @@ async def audio_transcriptions(
     api_key=Security(check_api_key),
 ) -> AudioTranscription | AudioTranscriptionVerbose:
     """
-    Audio transcriptions API similar to OpenAI's API.
-    See https://platform.openai.com/docs/api-reference/audio/create-transcription for the API specification.
+    Audio transcription API (custom implementation).
+
+    /!\ Note: This endpoint is **not** OpenAI API compatible.
+    The response format does not follow the OpenAI specification.
     """
 
     if model != args.model:
