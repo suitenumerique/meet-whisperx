@@ -12,7 +12,6 @@ from typing import Annotated
 
 import tempfile
 import os
-import shutil
 
 
 router = APIRouter()
