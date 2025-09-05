@@ -10,7 +10,12 @@ from utils.config import get_settings, Settings, settings
 
 
 # Setup FastAPI
-app = FastAPI(title="Whisper OpenAI API", version=settings.app_version, licence_info={"name": "MIT License", "identifier": "MIT"}, lifespan=lifespan)
+app = FastAPI(
+    title="Whisper OpenAI API",
+    version=settings.app_version,
+    licence_info={"name": "MIT License", "identifier": "MIT"},
+    lifespan=lifespan,
+)
 
 app.include_router(monitoring.router, tags=["Monitoring"])
 app.include_router(models.router, tags=["Model"], prefix="/v1")

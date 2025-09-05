@@ -1,4 +1,13 @@
-from fastapi import APIRouter, File, Form, Request, Security, UploadFile, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    File,
+    Form,
+    Request,
+    Security,
+    UploadFile,
+    Depends,
+    HTTPException,
+)
 
 import whisperx
 
@@ -41,7 +50,9 @@ async def audio_transcriptions(
     if model != args.model:
         raise ModelNotFoundException()
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
+    with tempfile.NamedTemporaryFile(
+        delete=False, suffix=os.path.splitext(file.filename)[1]
+    ) as temp_file:
         temp_file_path = temp_file.name
         content = await file.read()
         temp_file.write(content)
@@ -49,10 +60,14 @@ async def audio_transcriptions(
     audio = whisperx.load_audio(temp_file_path)
     os.remove(temp_file_path)
 
-    result = pipelines[args.model].transcribe(audio, batch_size=settings.batch_size, language=language)
+    result = pipelines[args.model].transcribe(
+        audio, batch_size=settings.batch_size, language=language
+    )
 
     device = get_device()
-    model_alignment, metadata = whisperx.load_align_model(language_code=result["language"], device=device)
+    model_alignment, metadata = whisperx.load_align_model(
+        language_code=result["language"], device=device
+    )
     result = whisperx.align(
         result["segments"],
         model_alignment,
@@ -65,6 +80,8 @@ async def audio_transcriptions(
 
     diarize_segments = pipelines["diarize_model"](audio)
 
-    result = whisperx.assign_word_speakers(diarize_segments, result, fill_nearest=settings.fill_nearest)
+    result = whisperx.assign_word_speakers(
+        diarize_segments, result, fill_nearest=settings.fill_nearest
+    )
 
     return AudioTranscription(**result)
