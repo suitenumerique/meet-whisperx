@@ -16,8 +16,12 @@ async def lifespan(app: FastAPI):
 
     settings = get_settings()
 
-    pipelines[args.model] = whisperx.load_model(args.model, device, compute_type=torch_dtype)
-    pipelines["diarize_model"] = whisperx.DiarizationPipeline(use_auth_token=settings.hf_token, device=device)
+    pipelines[args.model] = whisperx.load_model(
+        args.model, device, compute_type=torch_dtype
+    )
+    pipelines["diarize_model"] = whisperx.DiarizationPipeline(
+        use_auth_token=settings.hf_token, device=device
+    )
 
     yield
 
