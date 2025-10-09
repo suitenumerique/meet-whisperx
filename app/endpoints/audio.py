@@ -24,7 +24,7 @@ from typing import Annotated, Optional
 import tempfile
 import os
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("api")
 
 router = APIRouter()
 
