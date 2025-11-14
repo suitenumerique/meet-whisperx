@@ -36,7 +36,7 @@ async def audio_transcriptions(
     file: UploadFile = File(...),
     model: str = Form(args.model),
     api_key=Security(check_api_key),
-    language: Optional[str] = None,
+    language: Optional[str] = Form(None),
 ) -> AudioTranscription | AudioTranscriptionVerbose:
     """
     Audio transcription API (custom implementation).
