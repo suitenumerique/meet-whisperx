@@ -1,6 +1,6 @@
 [project]
 name = "whisper-openai-api"
-version = "1.0.3"
+version = "1.1.0"
 description = "Whisper OpenAI API"
 requires-python = ">=3.10"
 license = { text = "MIT" }
