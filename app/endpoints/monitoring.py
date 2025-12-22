@@ -1,15 +1,11 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Security, Response
-
-from utils.security import check_api_key
+from fastapi import APIRouter, Response
 
 
 router = APIRouter()
 
 
 @router.get("/health")
-def health(api_key: Annotated[str, Security(check_api_key)]):
+def health():
     """
     Health check.
     """
