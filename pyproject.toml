@@ -14,14 +14,15 @@ dependencies = [
     "whisperx==3.3.1",
     "torch==2.6.0",
     "torchaudio==2.6.0",
-    "matplotlib==3.10.7",
     "transformers<5.0"
+
 ]
 
 [project.optional-dependencies]
 dev = [
     "ruff==0.6.5",
     "pre-commit==3.6.2",
+    "matplotlib==3.10.7",
 ]
 test = [
     "pytest==8.3.3",
