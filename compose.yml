@@ -6,7 +6,7 @@ services:
     ports:
       - 8010:8000
     volumes:
-      - ${MODELS_CACHE_DIR:-"/data/models"}:/home/whisper/.cache/huggingface:rw
+      - ${MODELS_CACHE_DIR:-/data/models}:/home/whisper/.cache/huggingface:rw
     deploy:
       resources:
         reservations:
