@@ -9,7 +9,7 @@ dependencies = [
     "uvicorn==0.32.0",
     "fastapi==0.115.3",
     "pydantic==2.9.2",
-    "python-multipart==0.0.12",
+    "python-multipart==0.0.22",
     "pydantic-settings==2.6.1",
     "whisperx==3.3.1",
     "torch==2.6.0",
