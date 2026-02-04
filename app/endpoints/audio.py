@@ -14,11 +14,11 @@ import logging
 import time
 
 from schemas.audio import AudioTranscription, AudioTranscriptionVerbose
+from services.transcription import transcribe
 from utils.args import args
 from utils.exceptions import ModelNotFoundException
-from utils.lifespan import pipelines
 from utils.security import check_api_key
-from utils.config import get_settings, Settings, get_device
+from utils.config import get_settings, Settings
 from typing import Annotated, Optional
 
 import tempfile
@@ -66,37 +66,10 @@ async def audio_transcriptions(
     reading_time = time.perf_counter() - reading_start
     logger.info("Reading time: %.3fs", reading_time)
 
-    logger.info("Starting transcription …")
+    logger.info("Loading audio file to whisper…")
     audio = whisperx.load_audio(temp_file_path)
     os.remove(temp_file_path)
 
-    result = pipelines[args.model].transcribe(
-        audio, batch_size=settings.batch_size, language=language
-    )
-
-    logger.info("Transcription done.")
-
-    device = get_device()
-    model_alignment, metadata = whisperx.load_align_model(
-        language_code=result["language"], device=device
-    )
-    result = whisperx.align(
-        result["segments"],
-        model_alignment,
-        metadata,
-        audio,
-        device,
-        interpolate_method=settings.interpolate_method,
-        return_char_alignments=settings.return_char_alignments,
-    )
-
-    logger.info("Diarization …")
-    diarize_segments = pipelines["diarize_model"](audio)
-
-    result = whisperx.assign_word_speakers(
-        diarize_segments, result, fill_nearest=settings.fill_nearest
-    )
-
-    logger.info("Diarization done.")
+    result = transcribe(audio, settings, language)
 
     return AudioTranscription(**result)
