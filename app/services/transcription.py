@@ -2,8 +2,7 @@ import logging
 import whisperx
 import numpy as np
 
-from utils.args import args
-from utils.config import Settings, get_device
+from utils.config import Settings, get_device, get_settings
 from utils.lifespan import pipelines
 
 logger = logging.getLogger("api")
@@ -28,7 +27,7 @@ def _transcribe_audio(
 ) -> dict:
     """Run whisperx transcription on audio."""
     logger.info("Starting transcription …")
-    result = pipelines[args.model].transcribe(
+    result = pipelines[settings.model].transcribe(
         audio, batch_size=settings.batch_size, language=language
     )
     logger.info("Transcription done.")

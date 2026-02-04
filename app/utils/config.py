@@ -16,6 +16,14 @@ class Settings(BaseSettings):
     interpolate_method: str = "nearest"
     fill_nearest: bool = False
 
+    # Server settings (previously command-line args)
+    model: str = "large-v2"
+    port: int = 8000
+    reload: bool = False
+    root_path: str | None = None
+    logging_config: str | None = None
+    debug: bool = False
+
     model_config = SettingsConfigDict(env_file=".env")
 
 

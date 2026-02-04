@@ -1,11 +1,11 @@
-from typing import Optional, Union
+from typing import Annotated, Optional, Union
 import datetime as dt
 
-from fastapi import APIRouter, Security
+from fastapi import APIRouter, Depends, Security
 
 from schemas.models import Model, Models
-from utils.args import args
 from utils.security import check_api_key
+from utils.config import get_settings, Settings
 
 router = APIRouter()
 
@@ -13,7 +13,9 @@ router = APIRouter()
 @router.get("/models/{model:path}")
 @router.get("/models")
 async def models(
-    model: Optional[str] = None, api_key=Security(check_api_key)
+    settings: Annotated[Settings, Depends(get_settings)],
+    model: Optional[str] = None,
+    api_key=Security(check_api_key),
 ) -> Union[Models, Model]:
     """
     Model API similar to OpenAI's API.
@@ -23,7 +25,7 @@ async def models(
     data = [
         Model(
             object="model",
-            id=args.model,
+            id=settings.model,
             created=round(dt.datetime.now().timestamp()),
             owned_by="whisper-openai-api",
             type="automatic-speech-recognition",

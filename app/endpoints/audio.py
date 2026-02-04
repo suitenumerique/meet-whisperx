@@ -15,7 +15,6 @@ import time
 
 from schemas.audio import AudioTranscription, AudioTranscriptionVerbose
 from services.transcription import transcribe
-from utils.args import args
 from utils.exceptions import ModelNotFoundException
 from utils.security import check_api_key
 from utils.config import get_settings, Settings
@@ -34,7 +33,7 @@ async def audio_transcriptions(
     request: Request,
     settings: Annotated[Settings, Depends(get_settings)],
     file: UploadFile = File(...),
-    model: str = Form(args.model),
+    model: str = Form(None),
     api_key=Security(check_api_key),
     language: Optional[str] = Form(None),
 ) -> AudioTranscription | AudioTranscriptionVerbose:
@@ -51,7 +50,9 @@ async def audio_transcriptions(
             status_code=400, detail=f"Unsupported language '{language}'."
         )
 
-    if model != args.model:
+    if model is None:
+        model = settings.model
+    if model != settings.model:
         raise ModelNotFoundException()
 
     logger.info("Reading file …")

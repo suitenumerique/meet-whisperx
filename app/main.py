@@ -4,7 +4,6 @@ from fastapi import FastAPI, Depends
 from typing import Annotated
 
 from endpoints import monitoring, models, audio
-from utils.args import args
 from utils.lifespan import lifespan
 from utils.config import get_settings, Settings, settings
 
@@ -32,13 +31,13 @@ async def info(settings: Annotated[Settings, Depends(get_settings)]):
 
 
 if __name__ == "__main__":
-    app.root_path = args.root_path
+    app.root_path = settings.root_path
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=args.port,
-        log_level="debug" if args.debug else "info",
-        log_config=args.logging_config,
-        reload=args.reload,
+        port=settings.port,
+        log_level="debug" if settings.debug else "info",
+        log_config=settings.logging_config,
+        reload=settings.reload,
         timeout_keep_alive=settings.timeout_keep_alive,
     )

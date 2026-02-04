@@ -73,4 +73,7 @@ COPY --chown=whisperuser:whisperuser ./logging-config.yaml /app/logging-config.y
 
 USER whisperuser
 
-CMD ["python3", "main.py", "--model", "large-v2", "--logging-config", "logging-config.yaml"]
+ENV MODEL=large-v2
+ENV LOGGING_CONFIG=logging-config.yaml
+
+CMD ["python3", "main.py"]
