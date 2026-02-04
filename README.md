@@ -9,7 +9,10 @@ pip install .
 
 Run the server on port 8010 (avoid conflict with the default ports 8000, 8001... with other services)
 ```bash
-python app/main.py --port 8010 --reload
+export PORT=8010 
+export RELOAD=true
+export LOGGING_CONFIG=logging-config.yaml
+python app/main.py
 ```
 
 ### Docker development
@@ -20,7 +23,16 @@ export MODELS_CACHE_DIR="." && docker compose up --pull always
 
 ## Environment variables
 
-| Variable | Description |
-| -------- | ----------- |
-| MODELS_CACHE_DIR | Directory to store the models |
-| API_KEY | API key for API access (optional) |
+| Variable | Description | Default |
+| -------- | ----------- | ------- |
+| MODEL | WhisperX model to load | `large-v2` |
+| PORT | Server port | `8000` |
+| RELOAD | Enable auto-reload | `false` |
+| ROOT_PATH | API root path | `None` |
+| LOGGING_CONFIG | Path to logging config file | `None` |
+| DEBUG | Enable debug logging | `false` |
+| API_KEY | API key for API access | Required |
+| HF_TOKEN | Hugging Face token | Required |
+| BATCH_SIZE | Transcription batch size | `16` |
+| TIMEOUT_KEEP_ALIVE | Keep-alive timeout (seconds) | `60` |
+| MODELS_CACHE_DIR | Directory to store the models (Docker only) | `/data/models` |
