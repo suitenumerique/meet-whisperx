@@ -9,23 +9,26 @@ dependencies = [
     "uvicorn==0.32.0",
     "fastapi==0.115.3",
     "pydantic==2.9.2",
-    "python-multipart==0.0.12",
+    "python-multipart==0.0.22",
     "pydantic-settings==2.6.1",
-    "whisperx==3.3.1",
-    "torch==2.6.0",
-    "torchaudio==2.6.0",
-    "transformers<5.0"
-
 ]
 
 [project.optional-dependencies]
+# Heavy libraries used for inference (not required for local API dev)
+inference = [
+    "torch==2.6.0",
+    "torchaudio==2.6.0",
+    "transformers<5.0",
+    "whisperx==3.3.1",
+    "matplotlib==3.10.7",
+]
+
+# Helper libraries for dev
 dev = [
     "ruff==0.6.5",
     "pre-commit==3.6.2",
-    "matplotlib==3.10.7",
-]
-test = [
     "pytest==8.3.3",
+    "pip-audit"
 ]
 
 [tool.setuptools]
