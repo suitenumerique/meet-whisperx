@@ -164,3 +164,54 @@ cython_debug/
 
 # MODELS CACHE
 hub
+
+# ==============================
+# Editor Configs
+# ==============================
+
+# Dev container
+.devcontainer
+
+# VS Code
+.vscode
+
+# ==============================
+# AI Agent / LLM Assistant Files
+# ==============================
+
+# Claude / Anthropic agent notes
+CLAUDE.md
+CLAUDE.local.md
+CLAUDE.session.md
+.claude/
+.claude-cache/
+
+# ChatGPT / OpenAI workspace artifacts
+.chatgpt/
+chatgpt-notes.md
+openai-session.json
+
+# Cursor AI editor metadata
+.cursor/
+.cursor-cache/
+.cursor-session/
+
+# GitHub Copilot local state
+.copilot/
+copilot-workspace.json
+
+# Tool call logs / traces
+*.trace.json
+*.llm.json
+
+# Vector DB / embeddings caches (RAG)
+.embeddings/
+vectorstore/
+chroma/
+faiss.index
+*.sqlite3
+
+# Secrets accidentally stored by agents
+.env.agent
+.env.llm
+agent-secrets.json
