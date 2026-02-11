@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     app_version: str = "0.0.0"
 
     batch_size: int = 16
-    model: str = "large-v2"
-    preload_align_model_languages: list[str] = ["en", "fr", "nl", "de"]
+    transcribe_model: str = "large-v2"
+    preloaded_align_model_languages: list[str] = ["en", "fr", "nl", "de"]
     timeout_keep_alive: int = 60
 
     return_char_alignments: bool = False
