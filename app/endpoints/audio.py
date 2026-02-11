@@ -50,8 +50,8 @@ async def audio_transcriptions(
         )
 
     if model is None:
-        model = settings.model
-    if model != settings.model:
+        model = settings.transcribe_model
+    if model != settings.transcribe_model:
         raise ModelNotFoundException()
 
     logger.info("Reading file …")

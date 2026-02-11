@@ -28,7 +28,7 @@ def _transcribe_audio(
 ) -> dict:
     """Run whisperx transcription on audio."""
     logger.info("Starting transcription …")
-    result = pipelines[settings.model].transcribe(
+    result = pipelines["transcribe_model"].transcribe(
         audio, batch_size=settings.batch_size, language=language
     )
     logger.info("Transcription done.")
@@ -43,12 +43,18 @@ def _align_transcription(
     """Align transcription segments with audio."""
     logger.info("Aligning transcription …")
     device = get_device()
-    model_alignment, metadata = whisperx.load_align_model(
-        language_code=transcription_result["language"], device=device
-    )
+
+    language = transcription_result["language"]
+    if language in pipelines["align_models"]:
+        align_model, metadata = pipelines["align_models"][language]
+    else:
+        align_model, metadata = whisperx.load_align_model(
+            language_code=transcription_result["language"], device=device
+        )  # TODO: check that language is valid earlier in API
+
     aligned = whisperx.align(
         transcription_result["segments"],
-        model_alignment,
+        align_model,
         metadata,
         audio,
         device,

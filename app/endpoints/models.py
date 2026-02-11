@@ -1,11 +1,11 @@
-from typing import Annotated, Optional, Union
 import datetime as dt
+from typing import Annotated, Optional, Union
 
 from fastapi import APIRouter, Depends, Security
 
 from schemas.models import Model, Models
+from utils.config import Settings, get_settings
 from utils.security import check_api_key
-from utils.config import get_settings, Settings
 
 router = APIRouter()
 
@@ -25,7 +25,7 @@ async def models(
     data = [
         Model(
             object="model",
-            id=settings.model,
+            id=settings.transcribe_model,
             created=round(dt.datetime.now().timestamp()),
             owned_by="whisper-openai-api",
             type="automatic-speech-recognition",
