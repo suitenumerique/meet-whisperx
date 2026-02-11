@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     batch_size: int = 16
     model: str = "large-v2"
-    preload_align_model_languages: list[str] = ["en", "fr"]  # TODO: complete
+    preload_align_model_languages: list[str] = ["en", "fr", "nl", "de"]
     timeout_keep_alive: int = 60
 
     return_char_alignments: bool = False
