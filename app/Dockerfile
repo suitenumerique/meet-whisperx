@@ -28,8 +28,9 @@ COPY pyproject.toml /builder/
 
 
 # Install Python dependencies
-RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install --no-cache-dir .
+RUN python3 -m pip install --upgrade wheel && \
+    python3 -m pip install --upgrade pip && \
+    python3 -m pip install --no-cache-dir ".[inference]"
 
 
 FROM base AS production

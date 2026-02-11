@@ -4,7 +4,7 @@
 
 ### Local development
 ```bash
-pip install .
+pip install ".[inference]"
 ```
 
 Run the server on port 8010 (avoid conflict with the default ports 8000, 8001... with other services)
