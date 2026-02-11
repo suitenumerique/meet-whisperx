@@ -48,9 +48,10 @@ def _align_transcription(
     if language in pipelines["align_models"]:
         align_model, metadata = pipelines["align_models"][language]
     else:
+        # Weights are downloaded and cached but model does not stay loaded
         align_model, metadata = whisperx.load_align_model(
             language_code=transcription_result["language"], device=device
-        )  # TODO: check that language is valid earlier in API
+        )
 
     aligned = whisperx.align(
         transcription_result["segments"],
