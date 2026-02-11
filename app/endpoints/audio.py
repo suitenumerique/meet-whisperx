@@ -42,16 +42,25 @@ async def audio_transcriptions(
     /!\ Note: This endpoint is **not** OpenAI API compatible.
     The response format does not follow the OpenAI specification.
     """
-    logger.info("Request received. model: %s, language: %s", model, language)
+    logger.info("Request received. transcribe model: %s, language: %s", model, language)
 
-    if language is not None and language not in whisperx.utils.LANGUAGES:
+    if language is not None and (
+        (language not in whisperx.utils.LANGUAGES)
+        or (
+            language
+            not in (
+                whisperx.alignment.DEFAULT_ALIGN_MODELS_HF
+                | whisperx.alignment.DEFAULT_ALIGN_MODELS_TORCH
+            )
+        )
+    ):
         raise HTTPException(
             status_code=400, detail=f"Unsupported language '{language}'."
         )
 
     if model is None:
-        model = settings.model
-    if model != settings.model:
+        model = settings.transcribe_model
+    if model != settings.transcribe_model:
         raise ModelNotFoundException()
 
     logger.info("Reading file …")
