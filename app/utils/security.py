@@ -5,10 +5,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from utils.config import settings
 from utils.exceptions import (
-    InvalidAuthenticationSchemeException,
     InvalidAPIKeyException,
+    InvalidAuthenticationSchemeException,
 )
-
 
 auth_scheme = HTTPBearer(scheme_name="API key")
 

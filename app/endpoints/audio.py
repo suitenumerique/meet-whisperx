@@ -1,28 +1,26 @@
+import logging
+import os
+import tempfile
+import time
+from typing import Annotated, Optional
+
 from fastapi import (
     APIRouter,
+    Depends,
     File,
     Form,
+    HTTPException,
     Request,
     Security,
     UploadFile,
-    Depends,
-    HTTPException,
 )
-
+from services.transcription import transcribe
 import whisperx
-import logging
-import time
 
 from schemas.audio import AudioTranscription, AudioTranscriptionVerbose
-from services.transcription import transcribe
-from utils.args import args
+from utils.config import Settings, get_settings
 from utils.exceptions import ModelNotFoundException
 from utils.security import check_api_key
-from utils.config import get_settings, Settings
-from typing import Annotated, Optional
-
-import tempfile
-import os
 
 logger = logging.getLogger("api")
 
@@ -34,7 +32,7 @@ async def audio_transcriptions(
     request: Request,
     settings: Annotated[Settings, Depends(get_settings)],
     file: UploadFile = File(...),
-    model: str = Form(args.model),
+    model: Optional[str] = Form(None),
     api_key=Security(check_api_key),
     language: Optional[str] = Form(None),
 ) -> AudioTranscription | AudioTranscriptionVerbose:
@@ -51,7 +49,9 @@ async def audio_transcriptions(
             status_code=400, detail=f"Unsupported language '{language}'."
         )
 
-    if model != args.model:
+    if model is None:
+        model = settings.model
+    if model != settings.model:
         raise ModelNotFoundException()
 
     logger.info("Reading file …")
