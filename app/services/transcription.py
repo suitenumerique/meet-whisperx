@@ -28,7 +28,7 @@ def _transcribe_audio(
 ) -> dict:
     """Run whisperx transcription on audio."""
     logger.info("Starting transcription …")
-    result = pipelines[settings.model].transcribe(
+    result = pipelines.transcribe_model.transcribe(
         audio, batch_size=settings.batch_size, language=language
     )
     logger.info("Transcription done.")
@@ -43,12 +43,19 @@ def _align_transcription(
     """Align transcription segments with audio."""
     logger.info("Aligning transcription …")
     device = get_device()
-    model_alignment, metadata = whisperx.load_align_model(
-        language_code=transcription_result["language"], device=device
-    )
+
+    language = transcription_result["language"]
+    if language in pipelines.align_models:
+        align_model, metadata = pipelines.align_models[language]
+    else:
+        # Weights are downloaded and cached but model does not stay loaded
+        align_model, metadata = whisperx.load_align_model(
+            language_code=transcription_result["language"], device=device
+        )
+
     aligned = whisperx.align(
         transcription_result["segments"],
-        model_alignment,
+        align_model,
         metadata,
         audio,
         device,
@@ -66,7 +73,7 @@ def _diarize_and_assign_speakers(
 ) -> dict:
     """Run diarization and assign speakers to words."""
     logger.info("Diarization …")
-    diarize_segments = pipelines["diarize_model"](audio)
+    diarize_segments = pipelines.diarize_model(audio)
     result = whisperx.assign_word_speakers(
         diarize_segments, alignment_result, fill_nearest=settings.fill_nearest
     )
