@@ -7,18 +7,20 @@ import torch
 class Settings(BaseSettings):
     """Bootstrap settings"""
 
-    app_name: str = "whisperx-api"
-    app_version: str = "0.0.0"
-    batch_size: int = 16
     api_key: str
     hf_token: str
+    app_name: str = "whisperx-api"
+    app_version: str = "0.0.0"
+
+    batch_size: int = 16
+    transcribe_model: str = "large-v2"
+    preloaded_align_model_languages: list[str] = ["en", "fr", "nl", "de"]
     timeout_keep_alive: int = 60
+
     return_char_alignments: bool = False
     interpolate_method: str = "nearest"
     fill_nearest: bool = False
 
-    # Server settings (previously command-line args)
-    model: str = "large-v2"
     port: int = 8000
     reload: bool = False
     root_path: str | None = None
