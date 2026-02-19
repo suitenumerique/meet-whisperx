@@ -4,12 +4,16 @@ FastAPI-based ASR (Automatic Speech Recognition) API built on WhisperX. Provides
 
 ## Getting Started
 
+### Install uv
+
+NB: This package uses `uv` for package management as a modern alternative to pip. Install instructions [here](https://docs.astral.sh/uv/getting-started/installation/).
+
 ### API-only Development
 
-Inference libraries (`whisperx`, `pytorch`, etc.) are heavy and may not run on all devices. To install only what's needed for the API wrapper:
+Inference libraries (`whisperx`, `pytorch`, etc.) are heavy and may not run on all devices. We provide a `dev` dependency group to allow running API tests locally and IDE autocompletion. To install:
 
 ```bash
-pip install ".[dev]"
+uv sync --group dev
 ```
 
 ### Full Inference Development
@@ -17,7 +21,7 @@ pip install ".[dev]"
 To develop with a fully functional transcription pipeline:
 
 ```bash
-pip install ".[inference,dev]"
+uv sync --group dev --group inference
 ```
 
 Run the server locally (port 8010 avoids conflicts with other services):
