@@ -12,6 +12,8 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: .
@@ -21,7 +23,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.10"
           cache: "pip"
       - name: Install development dependencies
         run: pip install --user .[dev]
@@ -29,3 +31,22 @@ jobs:
         run: python -m ruff format --check .
       - name: Lint code with ruff
         run: python -m ruff check .
+
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      PYTHONPATH: app
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+      - name: Install development dependencies
+        run: pip install --user .[dev]
+      - name: Run tests
+        run: python -m pytest
