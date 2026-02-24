@@ -44,7 +44,7 @@ async def audio_transcriptions(
     """
     logger.info("Request received. transcribe model: %s, language: %s", model, language)
 
-    if language is not None and language not in whisperx.utils.LANGUAGES:
+    if language is not None and (language not in whisperx.utils.LANGUAGES):
         raise HTTPException(
             status_code=400,
             detail=f"Unsupported language '{language}' for transcription.",
