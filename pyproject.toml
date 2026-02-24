@@ -16,7 +16,7 @@ dependencies = [
 [dependency-groups]
 # Heavy libraries used for inference (not required for local API dev)
 inference = [
-    "torch==2.6.0",
+    "torch==2.8.0",
     "torchaudio==2.6.0",
     "transformers<5.0",
     "whisperx==3.3.1",
