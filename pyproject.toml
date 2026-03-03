@@ -32,6 +32,12 @@ dev = [
     "pip-audit",
 ]
 
+[tool.uv]
+# Pins for transitive deps with known vulnerabilities
+constraint-dependencies = [
+    "nltk>=3.9.3",  # Fixes arbitrary code execution in downloader
+]
+
 [tool.ruff]
 line-length = 88
 
