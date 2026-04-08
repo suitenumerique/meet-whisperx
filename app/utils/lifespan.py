@@ -30,8 +30,8 @@ async def lifespan(app: FastAPI):
     pipelines.transcribe_model = whisperx.load_model(
         settings.transcribe_model, device, compute_type=torch_dtype
     )
-    pipelines.diarize_model = whisperx.DiarizationPipeline(
-        use_auth_token=settings.hf_token, device=device
+    pipelines.diarize_model = DiarizationPipeline(
+        model_name=settings.diarize_model, token=settings.hf_token, device=device
     )
     for language in settings.preloaded_align_model_languages:
         pipelines.align_models[language] = whisperx.load_align_model(
