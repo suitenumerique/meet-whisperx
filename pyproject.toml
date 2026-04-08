@@ -55,4 +55,6 @@ sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 [tool.pytest.ini_options]
 addopts = "--exitfirst --log-cli-level=INFO"
 testpaths = ["app/tests"]
+pythonpath = ["app"]
 minversion = "8.2.2"
+markers = ["integration: end-to-end tests with real audio fixtures"]
