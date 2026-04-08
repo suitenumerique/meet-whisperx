@@ -14,6 +14,7 @@ class Settings(BaseSettings):
 
     batch_size: int = 16
     transcribe_model: str = "large-v2"
+    diarize_model: str = "pyannote/speaker-diarization-community-1"
     preloaded_align_model_languages: list[str] = ["en", "fr", "nl", "de"]
     timeout_keep_alive: int = 60
 
