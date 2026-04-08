@@ -54,7 +54,7 @@ ARG HF_HOME=/data/models
 ENV HF_HOME=${HF_HOME}
 ENV TRANSFORMERS_CACHE=${HF_HOME}
 
-# PyTorch 2.6: torch.load now defaults to weights_only=True (was False);
+# PyTorch 2.8: torch.load defaults to weights_only=True;
 # Whisper v2 fails to load, so force legacy behavior.
 ARG TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
 ENV TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=${TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD}

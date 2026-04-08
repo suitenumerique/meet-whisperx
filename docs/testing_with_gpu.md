@@ -23,6 +23,7 @@ Set these environment variables **before starting the pod** (RunPod > Pod Settin
 | `API_KEY`                           | *(choose any value — the tests will read and use this same value)* |
 | `HF_TOKEN`                          | *(your HF token)*   |
 | `TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD` | `1`                 |
+| `HF_HUB_ENABLE_HF_TRANSFER` | `0`                 |
 
 ## 2. Install System Dependencies
 

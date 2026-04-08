@@ -16,12 +16,11 @@ dependencies = [
 [dependency-groups]
 # Heavy libraries used for inference (not required for local API dev)
 inference = [
-    "torch==2.6.0",
-    "torchaudio==2.6.0",
-    "transformers<5.0",
-    "whisperx==3.3.1",
-    "matplotlib==3.10.7",
-    "onnxruntime<1.24",  # 1.24+ dropped Python 3.10 wheels
+    "torch==2.8.0",
+    "torchaudio==2.8.0",
+    "numpy>=2.1.0",
+    "transformers>=4.48.0",
+    "whisperx==3.8.5",
 ]
 # Helper libraries for dev
 dev = [
