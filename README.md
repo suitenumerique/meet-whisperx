@@ -42,6 +42,10 @@ cd app
 python -m pytest tests/ -v
 ```
 
+### Integration tests (not run in CI)
+
+Check the [documentation to run integration tests](docs/testing_with_gpu.md) on GPU.
+
 ## Environment Variables
 
 | Variable | Description | Default |
