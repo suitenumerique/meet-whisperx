@@ -22,6 +22,7 @@ inference = [
     "whisperx==3.3.1",
     "matplotlib==3.10.7",
     "onnxruntime<1.24",  # 1.24+ dropped Python 3.10 wheels
+    "hf_transfer==0.1.9",
 ]
 # Helper libraries for dev
 dev = [
@@ -55,4 +56,6 @@ sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 [tool.pytest.ini_options]
 addopts = "--exitfirst --log-cli-level=INFO"
 testpaths = ["app/tests"]
+pythonpath = ["app"]
 minversion = "8.2.2"
+markers = ["integration: end-to-end tests with real audio fixtures"]
