@@ -65,18 +65,17 @@ async def audio_transcriptions(
     logger.info("Reading file …")
     reading_start = time.perf_counter()
     with tempfile.NamedTemporaryFile(
-        delete=False, suffix=os.path.splitext(file.filename)[1]
+        suffix=os.path.splitext(file.filename)[1]
     ) as temp_file:
         temp_file_path = temp_file.name
         content = await file.read()
         temp_file.write(content)
 
-    reading_time = time.perf_counter() - reading_start
-    logger.info("Reading time: %.3fs", reading_time)
+        reading_time = time.perf_counter() - reading_start
+        logger.info("Reading time: %.3fs", reading_time)
 
-    logger.info("Loading audio file to whisper…")
-    audio = whisperx.load_audio(temp_file_path)
-    os.remove(temp_file_path)
+        logger.info("Loading audio file to whisper…")
+        audio = whisperx.load_audio(temp_file_path)
 
     result = transcribe(audio, settings, language)
 
