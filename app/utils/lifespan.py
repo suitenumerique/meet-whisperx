@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import Any
@@ -18,6 +19,9 @@ class Pipelines:
 
 
 pipelines = Pipelines()
+
+# GPU inferences serialized (one by one)
+gpu_executor = ThreadPoolExecutor(max_workers=1)
 
 
 @asynccontextmanager

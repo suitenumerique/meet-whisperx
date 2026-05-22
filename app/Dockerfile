@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 AS base
+FROM nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04 AS base
 
 ENV PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive \
@@ -18,7 +18,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /uvx /usr/local/bin/
 # Install Python and build tools
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    python3 \
+    python3.11 \
     git \
     build-essential && \
     apt-get clean && \
@@ -29,7 +29,7 @@ COPY pyproject.toml uv.lock /builder/
 
 # Install Python dependencies into /usr/local for multi-stage copy
 ENV UV_PROJECT_ENVIRONMENT=/usr/local
-RUN ln -sf /usr/bin/python3 /usr/local/bin/python3 && \
+RUN ln -sf /usr/bin/python3.11 /usr/local/bin/python3 && \
     uv sync --frozen --group inference --no-dev --no-editable
 
 COPY ./app /builder/app/
@@ -42,7 +42,7 @@ COPY --from=builder /usr/local /usr/local
 RUN apt-get update && \
     apt-get install -y \
     ffmpeg \
-    python3 && \
+    python3.11 && \
     rm -rf /var/lib/apt/lists/*
 
 ARG DOCKER_USER=1000
@@ -75,4 +75,4 @@ COPY --chown=whisperuser:whisperuser ./logging-config.yaml /app/logging-config.y
 
 USER whisperuser
 
-CMD ["python3", "main.py"]
+ENTRYPOINT ["sh", "-c", "gunicorn main:app --workers ${WORKERS:-1} --worker-class uvicorn.workers.UvicornWorker --timeout ${TIMEOUT:-120} --keep-alive ${KEEP_ALIVE:-60} --graceful-timeout ${GRACEFUL_TIMEOUT:-75} --worker-connections ${WORKER_CONNECTIONS:-1000} --bind 0.0.0.0:${PORT:-8000}"]
