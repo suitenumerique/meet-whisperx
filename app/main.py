@@ -7,7 +7,6 @@ from endpoints import audio, models, monitoring
 from utils.config import Settings, get_settings, settings
 from utils.lifespan import lifespan
 
-# Setup FastAPI
 app = FastAPI(
     title="LaSuite Meet WhisperX",
     version=settings.app_version,
@@ -39,4 +38,6 @@ if __name__ == "__main__":
         log_config=settings.logging_config,
         reload=settings.reload,
         timeout_keep_alive=settings.timeout_keep_alive,
+        timeout_graceful_shutdown=settings.timeout_graceful_shutdown,
+        workers=settings.workers,
     )
