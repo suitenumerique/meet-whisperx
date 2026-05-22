@@ -8,7 +8,7 @@ from utils.config import Settings, get_settings, settings
 from utils.lifespan import lifespan
 
 app = FastAPI(
-    title="WhisperX Serve",
+    title="LaSuite Meet WhisperX",
     version=settings.app_version,
     license_info={"name": "MIT License", "identifier": "MIT"},
     lifespan=lifespan,
