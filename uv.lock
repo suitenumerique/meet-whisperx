@@ -719,6 +719,15 @@ wheels = [
 ]
 
 [[package]]
+name = "datatypes"
+version = "0.34.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/49/c7/9e6b7798980671c6b4262c51bfa4c65554d5461680513faa1df891672106/datatypes-0.34.0.tar.gz", hash = "sha256:f36747456f10842000a33dc4ec916aae8891cbcafc00176c6d661c0951765303", size = 224814, upload-time = "2026-02-25T21:09:02.936Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/53/11/ed38de0d97bf08be7d83e05f30e70b70bd8d2977138fa8b88e2ef58f260f/datatypes-0.34.0-py3-none-any.whl", hash = "sha256:b5650880b573ca206c30ce205ce21f4dd7c0a5fee0ef682145ea07fe228d592d", size = 244865, upload-time = "2026-02-25T21:09:04.422Z" },
+]
+
+[[package]]
 name = "defusedxml"
 version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -752,6 +761,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/2c/77/850bef8d72ffb9219f0b1aac23fbc1bf7d038ee6ea666f331fa273031aa2/einops-0.8.2.tar.gz", hash = "sha256:609da665570e5e265e27283aab09e7f279ade90c4f01bcfca111f3d3e13f2827", size = 56261, upload-time = "2026-01-26T04:13:17.638Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/09/f8d8f8f31e4483c10a906437b4ce31bdf3d6d417b73fe33f1a8b59e34228/einops-0.8.2-py3-none-any.whl", hash = "sha256:54058201ac7087911181bfec4af6091bb59380360f069276601256a76af08193", size = 65638, upload-time = "2026-01-26T04:13:18.546Z" },
+]
+
+[[package]]
+name = "endpoints"
+version = "10.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "datatypes" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4f/b8/f67ce36ae39be306ea1454d37da1941bd157f399afa08d18b5012d0e3785/endpoints-10.0.0.tar.gz", hash = "sha256:ea39e0ea02b9245c0edc952bccaa01c675866ef430cdb971332518fbaf852d00", size = 67604, upload-time = "2026-02-25T21:13:23.145Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6f/62/ed06b2fe708e5d66ba6eecf13551e3327de3385e509d0be750825c5cb20b/endpoints-10.0.0-py3-none-any.whl", hash = "sha256:cf9b036dc82a8f15073f29d42971051499c9eb32bbd020946c8d791eb71f6c41", size = 74742, upload-time = "2026-02-25T21:13:24.744Z" },
 ]
 
 [[package]]
@@ -4412,7 +4433,7 @@ dev = [
     { name = "ruff" },
 ]
 inference = [
-    { name = "matplotlib" },
+    { name = "endpoints" },
     { name = "whisperx" },
 ]
 
@@ -4435,7 +4456,7 @@ dev = [
     { name = "ruff", specifier = "==0.15.16" },
 ]
 inference = [
-    { name = "matplotlib", specifier = "==3.10.9" },
+    { name = "endpoints" },
     { name = "whisperx", specifier = "==3.8.6" },
 ]
 

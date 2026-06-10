@@ -19,6 +19,7 @@ inference = [
 #    "torch==2.12.0",
 #    "torchaudio==2.11.0",
 #    "transformers<5.0",
+"endpoints",
     "whisperx==3.8.6",
 #    "matplotlib==3.10.9",
 #    "onnxruntime<1.24",  # 1.24+ dropped Python 3.10 wheels
