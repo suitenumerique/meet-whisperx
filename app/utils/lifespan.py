@@ -39,8 +39,9 @@ async def lifespan(app: FastAPI):
     torch_dtype = get_dtype()
     settings = get_settings()
 
-    sigles_rows = tuple(csv.DictReader(ASSETS_FOLDER.joinpath("sigles.csv").open("r"), delimiter=","))
-    hotwords = tuple(row["term"] for row in sigles_rows)
+    # sigles_rows = tuple(csv.DictReader(ASSETS_FOLDER.joinpath("sigles.csv").open("r"), delimiter=","))
+    # hotwords = tuple(row["term"] for row in sigles_rows)
+    hotwords = "DINUM, ANSSI, RGAA, DSI, DINSIC, API, RIE, COSSI, RGS, RGAA, DSIL, SDIS, ARS, DDT, ORSEC, DREAL, COD, SAMU, EHPAD, DRAAF, DDT, DGSCGC, COS, COGIC, SDIS, ARS, DDT, DREAL, DASEN, DIR, EPCI"
 
     # Downloads weights (cached by default) + load in memory
     pipelines.transcribe_model = whisperx.load_model(
