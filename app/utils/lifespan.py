@@ -1,5 +1,7 @@
+import csv
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI
@@ -10,6 +12,8 @@ from whisperx.diarize import DiarizationPipeline
 from utils.config import get_device, get_dtype, get_settings
 
 
+ASSETS_FOLDER = Path(__file__).parent.parent / "assets"
+
 @dataclass
 class Pipelines:
     transcribe_model: FasterWhisperPipeline | None = None
@@ -19,6 +23,15 @@ class Pipelines:
 
 pipelines = Pipelines()
 
+class LoggingDict(dict):
+    def __getitem__(self, key):
+        print(f"Accessing key: {key!r}")
+        return super().__getitem__(key)
+
+    def get(self, key, default=None):
+        print(f"Getting key: {key!r}")
+        return super().get(key, default)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -26,9 +39,12 @@ async def lifespan(app: FastAPI):
     torch_dtype = get_dtype()
     settings = get_settings()
 
+    sigles_rows = tuple(csv.DictReader(ASSETS_FOLDER.joinpath("sigles.csv").open("r"), delimiter=","))
+    hotwords = tuple(row["term"] for row in sigles_rows)
+
     # Downloads weights (cached by default) + load in memory
     pipelines.transcribe_model = whisperx.load_model(
-        settings.transcribe_model, device, compute_type=torch_dtype
+        settings.transcribe_model, device, compute_type=torch_dtype, asr_options=LoggingDict(hotwords=", ".join(hotwords))
     )
     pipelines.diarize_model = DiarizationPipeline(
         model_name=settings.diarize_model, token=settings.hf_token, device=device

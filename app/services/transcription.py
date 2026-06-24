@@ -29,7 +29,7 @@ def _transcribe_audio(
     """Run whisperx transcription on audio."""
     logger.info("Starting transcription …")
     result = pipelines.transcribe_model.transcribe(
-        audio, batch_size=settings.batch_size, language=language
+        audio, batch_size=settings.batch_size, language=language, options={}
     )
     logger.info("Transcription done.")
     return result
