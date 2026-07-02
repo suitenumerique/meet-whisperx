@@ -5,12 +5,12 @@ description = "Whisper OpenAI API"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
-    "openai==1.43.0",
-    "uvicorn==0.32.0",
-    "fastapi==0.115.3",
-    "pydantic==2.9.2",
-    "python-multipart==0.0.22",
-    "pydantic-settings==2.6.1",
+    "openai==2.41.0",
+    "uvicorn==0.49.0",
+    "fastapi==0.139.0",
+    "pydantic==2.13.4",
+    "python-multipart==0.0.32",
+    "pydantic-settings==2.14.2",
 ]
 
 [dependency-groups]
@@ -25,9 +25,9 @@ inference = [
 ]
 # Helper libraries for dev
 dev = [
-    "ruff==0.6.5",
-    "pre-commit==3.6.2",
-    "pytest==8.3.3",
+    "ruff==0.15.20",
+    "pre-commit==4.6.0",
+    "pytest==9.1.1",
     "httpx==0.28.1",
     "pip-audit",
 ]
