@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 AS base
+FROM nvidia/cuda:12.8.1-cudnn-runtime-ubuntu24.04 AS base
 
 ENV PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive \
@@ -13,7 +13,7 @@ RUN apt-get update && \
 FROM base AS builder
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.11.26 /uv /uvx /usr/local/bin/
 
 # Install Python and build tools
 RUN apt-get update && \
@@ -40,7 +40,7 @@ COPY --from=builder /usr/local /usr/local
 
 # Install runtime dependencies
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends  \
     ffmpeg \
     python3 && \
     rm -rf /var/lib/apt/lists/*
@@ -62,7 +62,7 @@ ENV TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=${TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD}
 # wip not sure about this part
 RUN mkdir -p ${HF_HOME} && \
     mkdir -p /home/whisperuser && \
-    # Set ownership
+    # Set ownership \
     chown -R whisperuser:whisperuser ${HF_HOME} && \
     chown -R whisperuser:whisperuser /home/whisperuser && \
     # Set permissions
