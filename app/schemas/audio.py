@@ -1,38 +1,33 @@
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from pydantic import BaseModel
 
 
-class Word(BaseModel):
-    """Represents a single word in the transcription"""
-
-    word: str
-    start: Optional[float] = None
-    end: Optional[float] = None
-    score: Optional[float] = None
-    speaker: Optional[str] = None
-
-
 class Segment(BaseModel):
-    """Represents a segment of transcribed audio"""
-
+    id: int
+    type: str = "transcript.text.segment"
+    text: str
     start: float
     end: float
-    text: str
-    words: List[Word]
     speaker: Optional[str] = None
+
+
+class InputTokenDetails(BaseModel):
+    text_tokens: int = 0
+    audio_tokens: int
+
+
+class Usage(BaseModel):
+    type: str = "tokens"
+    input_tokens: int
+    input_token_details: InputTokenDetails
+    output_tokens: int
+    total_tokens: int
 
 
 class AudioTranscription(BaseModel):
-    """Base audio transcription model"""
-
-    segments: List[Segment]
-    word_segments: Optional[List[Dict[str, Any]]] = None
-
-
-class AudioTranscriptionVerbose(AudioTranscription):
-    """Extended audio transcription model with additional details"""
-
-    language: str
-    duration: float
+    task: Optional[str] = None
+    language: Optional[str] = None
+    duration: Optional[float] = None
     text: str
-    words: List[Word]
+    segments: Optional[List[Segment]] = None
+    usage: Usage
