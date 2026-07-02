@@ -47,6 +47,8 @@ RUN apt-get update && \
 
 ARG DOCKER_USER=1000
 RUN groupadd -r whisperuser && \
+    # The base image already has a ubuntu user with id 1000 so we delete it \
+    userdel ubuntu && \
     useradd -r -g whisperuser -u ${DOCKER_USER} whisperuser
 
 # wip not sure about this part
