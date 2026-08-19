@@ -54,6 +54,9 @@ Check the [documentation to run integration tests](docs/testing_with_gpu.md) on 
 | HF_TOKEN | Hugging Face token | Required |
 | BATCH_SIZE | Transcription batch size | `16` |
 | MODEL | WhisperX model to load | `large-v2` |
+| DEVICE | Device for alignment and diarization: `cuda`, `mps` or `cpu` | auto-detected |
+| COMPUTE_TYPE | Compute type of the transcription model | `float16` on cuda, `float32` otherwise |
+| CPU_THREADS | Threads of the transcription model on CPU | `4` |
 | TIMEOUT_KEEP_ALIVE | Keep-alive timeout (seconds) | `60` |
 | RETURN_CHAR_ALIGNMENTS | Return character-level alignments | `false` |
 | INTERPOLATE_METHOD | WhisperX interpolation method | `nearest` |

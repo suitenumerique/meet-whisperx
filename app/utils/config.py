@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     preloaded_align_model_languages: list[str] = ["en", "fr", "nl", "de"]
     timeout_keep_alive: int = 60
 
+    device: str | None = None
+    compute_type: str | None = None
+    cpu_threads: int = 4
+
     return_char_alignments: bool = False
     interpolate_method: str = "nearest"
     fill_nearest: bool = False
@@ -41,9 +45,28 @@ settings = get_settings()
 
 @lru_cache
 def get_device():
-    return "cuda" if torch.cuda.is_available() else "cpu"
+    """Device running the torch models: alignment and diarization."""
+    if settings.device:
+        return settings.device
+
+    if torch.cuda.is_available():
+        return "cuda"
+
+    if torch.backends.mps.is_available():
+        return "mps"
+
+    return "cpu"
+
+
+@lru_cache
+def get_asr_device():
+    """Device running the CTranslate2 model, which has no Metal backend."""
+    return "cuda" if get_device() == "cuda" else "cpu"
 
 
 @lru_cache
 def get_dtype():
-    return "float16" if torch.cuda.is_available() else torch.float32
+    if settings.compute_type:
+        return settings.compute_type
+
+    return "float16" if get_asr_device() == "cuda" else "float32"
