@@ -9,7 +9,6 @@ from unittest.mock import MagicMock, patch
 _mock_np = MagicMock()
 _mock_torch = MagicMock()
 _mock_torch.cuda.is_available.return_value = False
-_mock_torch.float32 = "float32"
 
 _mock_whisperx = MagicMock()
 FAKE_LANGUAGES = {"en": "english", "fr": "french", "cz": "czech"}
