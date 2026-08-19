@@ -7,7 +7,7 @@ import whisperx
 from whisperx.asr import FasterWhisperPipeline
 from whisperx.diarize import DiarizationPipeline
 
-from utils.config import get_device, get_dtype, get_settings
+from utils.config import get_asr_device, get_device, get_dtype, get_settings
 
 
 @dataclass
@@ -23,12 +23,16 @@ pipelines = Pipelines()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     device = get_device()
+    asr_device = get_asr_device()
     torch_dtype = get_dtype()
     settings = get_settings()
 
     # Downloads weights (cached by default) + load in memory
     pipelines.transcribe_model = whisperx.load_model(
-        settings.transcribe_model, device, compute_type=torch_dtype
+        settings.transcribe_model,
+        asr_device,
+        compute_type=torch_dtype,
+        threads=settings.cpu_threads,
     )
     pipelines.diarize_model = DiarizationPipeline(
         model_name=settings.diarize_model, token=settings.hf_token, device=device
