@@ -46,4 +46,4 @@ def get_device():
 
 @lru_cache
 def get_dtype():
-    return "float16" if torch.cuda.is_available() else torch.float32
+    return "float16" if torch.cuda.is_available() else "float32"
