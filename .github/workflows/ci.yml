@@ -35,6 +35,6 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
       - name: Install development dependencies
-        run: uv sync --locked --group dev
+        run: uv sync --locked --no-build --group dev
       - name: Run tests
-        run: uv run --no-sync pytest
+        run: uv run --no-sync --no-build pytest
