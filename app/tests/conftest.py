@@ -77,7 +77,7 @@ def _test_settings() -> Settings:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def client():
     """TestClient with dependency overrides and lifespan disabled."""
     app = FastAPI()
@@ -90,7 +90,7 @@ def client():
         yield c
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_whisperx():
     """Patch whisperx symbols used directly in the endpoint module."""
     with patch.object(
@@ -99,7 +99,7 @@ def mock_whisperx():
         yield {"load_audio": load_audio, "fake_audio": FAKE_AUDIO}
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_transcribe():
     """Patch the transcribe service function as imported in the endpoint module."""
     with patch.object(
@@ -110,7 +110,7 @@ def mock_transcribe():
         yield mock
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_audio_bytes() -> bytes:
     """Minimal bytes to simulate an uploaded audio file."""
     return b"\x00" * 1024

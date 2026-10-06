@@ -20,12 +20,12 @@ FIXTURES = Path(__file__).parent / "fixtures"
 ENDPOINT = "/v1/audio/transcriptions"
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_ogg() -> bytes:
     return (FIXTURES / "sample_en_1.ogg").read_bytes()
 
 
-@pytest.fixture()
+@pytest.fixture
 def expected_output() -> dict:
     return json.loads((FIXTURES / "sample_en_1_expected.json").read_text())
 
