@@ -5,7 +5,7 @@ import os
 import pytest
 
 
-@pytest.fixture()
+@pytest.fixture
 def integration_client():
     """TestClient using the real app with real model loading."""
     from fastapi.testclient import TestClient
