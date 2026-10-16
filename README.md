@@ -64,6 +64,12 @@ Check the [documentation to run integration tests](docs/testing_with_gpu.md) on 
 | LOGGING_CONFIG | Path to logging config file | `None` |
 | DEBUG | Enable debug logging | `false` |
 
+## Performance benchmarks
+
+See [the RunPod benchmark guide](benchmarks/README.md) for separate repository and
+premium pyannote.ai runners, per-file timing/resource JSON, and a comparison notebook
+for batch-size sweeps and L40S/H100 results.
+
 ## Contributing
 
 Please follow [these guidelines](https://suitenumerique.gitbook.io/handbook) when contributing to this repo.
