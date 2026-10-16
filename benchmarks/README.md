@@ -4,7 +4,8 @@ Two independent runners produce the same JSON protocol:
 
 - `run_repo.py`: the repository's real `lifespan` and `transcribe` functions,
   including all four preloaded alignment languages by default.
-- `run_premium.py`: local premium `Pipeline.transcribe(path, FasterWhisperSTT())`.
+- `run_premium.py`: local premium `Pipeline.transcribe` with `FasterWhisperSTT`
+  explicitly configured for `Systran/faster-whisper-large-v2` by default.
   No hybrid pipeline, HTTP service, remote transcription API, or quality scoring.
 - `compare.ipynb`: reconcile results from both environments and both GPUs.
   Analysis needs neither CUDA nor either inference SDK.
@@ -47,7 +48,7 @@ export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
 
 /workspace/venvs/repo/bin/python benchmarks/run_repo.py \
   --label l40s-repo --data-dir /data \
-  --batch-sizes 8 16 32 64 --repeats 3
+  --batch-sizes 8 16 32 64 --repeats 1 --language fr
 ```
 
 Settings otherwise come from the application's existing environment/`.env`.
@@ -78,17 +79,24 @@ uv pip install --python /workspace/venvs/premium/bin/python \
 /workspace/venvs/premium/bin/python benchmarks/run_premium.py --describe-backend
 /workspace/venvs/premium/bin/python benchmarks/run_premium.py \
   --label l40s-premium --data-dir /data \
-  --batch-sizes 8 16 32 64 --modes accuracy --repeats 3
+  --batch-sizes 32 64 128 --modes accuracy --repeats 3
 ```
 
-The supplied documentation does not specify FasterWhisperSTT constructor
-options. The runner uses the documented no-argument constructor by default and
-records its signature/defaults. To select the same ASR model as the repo
-(`large-v2` by default), inspect `--describe-backend` in the installed premium
-environment, then pass supported constructor arguments via
-`--stt-kwargs '{...}'`. Unsupported arguments fail explicitly. Unspecified options
-retain vendor defaults; a run with different ASR models measures the performance
-of those complete setups. Do not assume matching model names or precision.
+The premium runner defaults to `Systran/faster-whisper-large-v2`, matching the
+repo's default large-v2 ASR model family. Override it with
+`--stt-model Systran/faster-whisper-large-v2` (or another model ID/local path).
+The onboarding notebook lists the vendor default as
+`pyannoteAI/faster-whisper-large-v3-turbo`; the runner explicitly replaces that.
+
+The supplied docs do not specify the STT constructor's model keyword. The runner
+inspects the installed signature to resolve it and records the resolved keyword
+and model in each JSON. If it cannot identify it, it fails before loading models;
+inspect `--describe-backend` and pass `--stt-model-parameter <keyword>` as needed.
+Other constructor options can be passed via `--stt-kwargs '{...}'`; an explicit
+model keyword in that object takes precedence over `--stt-model`. Unsupported
+arguments fail explicitly. Precision and all other unspecified options retain
+SDK defaults, so matching model names alone does not imply identical inference
+settings.
 
 Repeat both commands on H100 using labels `h100-repo` and `h100-premium`.
 Keep premium package versions and STT options identical across GPUs; use the

@@ -91,6 +91,7 @@ class ProtocolTests(unittest.TestCase):
 
         class FasterWhisperSTT(STT):
             def __init__(self, model_name="large-v2"):
+                self_test.assertEqual(model_name, "Systran/faster-whisper-large-v2")
                 self.model_name = model_name
 
             def apply(self, file, cut_points=None):
@@ -145,6 +146,51 @@ class ProtocolTests(unittest.TestCase):
                     {"native_transcribe", "stt_apply"},
                 )
                 backend.close()
+
+    def test_premium_model_options_resolve_sdk_keyword_and_preserve_overrides(self):
+        from run_premium import DEFAULT_STT_MODEL, stt_options
+
+        def backend(model_size_or_path="vendor-default", compute_type="default"):
+            pass
+
+        config = {"stt_kwargs": {"compute_type": "float16"}}
+        kwargs, parameter = stt_options(backend, config)
+        self.assertEqual(parameter, "model_size_or_path")
+        self.assertEqual(
+            kwargs, {"model_size_or_path": DEFAULT_STT_MODEL, "compute_type": "float16"}
+        )
+        self.assertNotIn("model_size_or_path", config["stt_kwargs"])
+        kwargs, _ = stt_options(
+            backend, {"stt_kwargs": {}, "stt_model": "custom/model"}
+        )
+        self.assertEqual(kwargs[parameter], "custom/model")
+        kwargs, _ = stt_options(backend, {"stt_kwargs": {parameter: "explicit/model"}})
+        self.assertEqual(kwargs[parameter], "explicit/model")
+
+    def test_premium_model_options_detect_vendor_default_and_fail_on_opaque_signature(
+        self,
+    ):
+        from run_premium import DEFAULT_STT_MODEL, stt_options
+
+        def backend(model="pyannoteAI/faster-whisper-large-v3-turbo"):
+            pass
+
+        kwargs, parameter = stt_options(backend, {"stt_kwargs": {}})
+        self.assertEqual((parameter, kwargs[parameter]), ("model", DEFAULT_STT_MODEL))
+
+        def opaque_backend(**kwargs):
+            pass
+
+        with self.assertRaisesRegex(TypeError, "--stt-model-parameter"):
+            stt_options(opaque_backend, {"stt_kwargs": {}})
+        kwargs, parameter = stt_options(
+            opaque_backend,
+            {
+                "stt_kwargs": {},
+                "stt_model_parameter": "checkpoint",
+            },
+        )
+        self.assertEqual(kwargs[parameter], DEFAULT_STT_MODEL)
 
     def test_resource_peaks_ignore_boundary_samples_and_preserve_null(self):
         sample = fixture_record()["resources"]["samples"][0]

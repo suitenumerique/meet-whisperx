@@ -8,15 +8,47 @@ import sys
 from common import main
 
 
+DEFAULT_STT_MODEL = "Systran/faster-whisper-large-v2"
+
+
+def stt_options(constructor, config):
+    """Select the requested model using the installed SDK's constructor signature."""
+    signature = inspect.signature(constructor)
+    kwargs = dict(config["stt_kwargs"])
+    parameter = config.get("stt_model_parameter")
+    if parameter is None:
+        # Prefer the SDK's explicit model-ID/path argument. Never assume that an
+        # opaque **kwargs accepts a particular spelling, or that `model=None`
+        # accepts a string rather than an already constructed WhisperModel.
+        for name in ("model_size_or_path", "model_name", "model_id", "model_path"):
+            if name in signature.parameters:
+                parameter = name
+                break
+        if parameter is None:
+            candidates = [
+                p.name
+                for p in signature.parameters.values()
+                if isinstance(p.default, str) and "faster-whisper" in p.default
+            ]
+            if len(candidates) == 1:
+                parameter = candidates[0]
+    if parameter is None:
+        raise TypeError(
+            f"Cannot identify the STT model argument in FasterWhisperSTT{signature}. "
+            "Inspect --describe-backend and specify --stt-model-parameter with "
+            "the SDK's model-ID argument. The vendor default will not be used."
+        )
+    kwargs.setdefault(parameter, config.get("stt_model", DEFAULT_STT_MODEL))
+    signature.bind(**kwargs)
+    return kwargs, parameter
+
+
 class PremiumBackend:
     def __init__(self, config):
         from pyannoteai.local import Pipeline
         from pyannoteai.stt import FasterWhisperSTT, STT
 
-        # The supplied docs only guarantee the no-argument STT constructor.
-        # Forward explicitly requested options, failing rather than ignoring them.
-        kwargs = config["stt_kwargs"]
-        inspect.signature(FasterWhisperSTT).bind(**kwargs)
+        kwargs, model_parameter = stt_options(FasterWhisperSTT, config)
         self.pipeline = Pipeline(
             os.environ["PYA_JOBS_KEY"],
             batch_size=config["batch_size"],
@@ -55,10 +87,12 @@ class PremiumBackend:
             "batch_target": "premium_diarization",
             "mode": config["mode"],
             "stt_class": "FasterWhisperSTT",
+            "stt_model": kwargs[model_parameter],
+            "stt_model_parameter": model_parameter,
             "stt_kwargs": kwargs,
             "stt_constructor": str(inspect.signature(FasterWhisperSTT)),
             "pipeline_version": str(Pipeline.version),
-            "note": "Unspecified STT options use installed SDK defaults.",
+            "note": "The ASR model is explicit; other unspecified options use SDK defaults.",
         }
 
     def transcribe(self, path, clock):

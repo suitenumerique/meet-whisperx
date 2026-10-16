@@ -568,6 +568,15 @@ def main(pipeline, factory):
             default=["accuracy"],
         )
         parser.add_argument("--stt-kwargs", type=json.loads, default={})
+        parser.add_argument(
+            "--stt-model",
+            default="Systran/faster-whisper-large-v2",
+            help="FasterWhisperSTT model ID/path (default: %(default)s)",
+        )
+        parser.add_argument(
+            "--stt-model-parameter",
+            help="SDK constructor keyword for the model ID, if auto-detection fails",
+        )
     parser.add_argument("--_worker", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args._worker:
@@ -622,7 +631,12 @@ def main(pipeline, factory):
             if pipeline == "repo":
                 config["language"] = args.language
             else:
-                config.update(mode=mode, stt_kwargs=args.stt_kwargs)
+                config.update(
+                    mode=mode,
+                    stt_kwargs=args.stt_kwargs,
+                    stt_model=args.stt_model,
+                    stt_model_parameter=args.stt_model_parameter,
+                )
             config_id = fingerprint(config)[:16]
             job = {
                 "run_id": run_id,
