@@ -1,0 +1,2 @@
+pyannoteai-local[io]==4.0.0
+pyannoteai-stt[faster-whisper]==0.2.1
