@@ -189,6 +189,10 @@ trial. Startup/warm-up failures mark the remaining trials as setup errors. A har
 worker crash is detected from the durable `running` record. A run with failures
 exits nonzero; completed JSON files remain usable. Each CLI invocation makes a
 new run directory; there is no cross-invocation resume or automatic GPU rental.
+Setup errors print their phase (`environment`, `resource_monitor`,
+`model_initialization`, or `warmup`), traceback and diagnostic JSON path to stderr.
+Per-file errors print their traceback and result path too. Existing runs' setup
+errors can be inspected in `<config-id>/startup-error-*.json`.
 
 ## Reconcile results
 

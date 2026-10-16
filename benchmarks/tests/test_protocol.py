@@ -79,6 +79,59 @@ def fixture_record(pipeline="repo", gpu="L40S", file_id="a", repeat=1):
 
 
 class ProtocolTests(unittest.TestCase):
+    def test_setup_errors_are_printed_and_saved_with_phase_and_redacted_traceback(self):
+        import common
+        from contextlib import redirect_stderr
+        from io import StringIO
+        from types import SimpleNamespace
+
+        with tempfile.TemporaryDirectory() as temporary:
+            entry = fixture_record()["file"]
+            job = {
+                "directory": temporary,
+                "run_id": "setup-test",
+                "label": "test",
+                "pipeline": "premium",
+                "config": {"batch_size": 32},
+                "config_id": "test",
+                "dataset_id": "corpus",
+                "tasks": [{"file": entry, "repeat": 1}],
+                "files": [entry],
+                "planned_trials": 1,
+                "sample_interval_s": 0.2,
+                "warmup_files": 0,
+            }
+
+            def fail(config):
+                raise RuntimeError("Cannot initialize: " + os.environ["PYA_JOBS_KEY"])
+
+            stream = StringIO()
+            torch = SimpleNamespace(cuda=SimpleNamespace(synchronize=lambda: None))
+            with (
+                patch.dict(sys.modules, {"torch": torch}),
+                patch.dict(os.environ, {"PYA_JOBS_KEY": "private-test-key"}),
+            ):
+                with (
+                    patch.object(
+                        common, "environment", return_value={"gpu": {"uuid": "fake"}}
+                    ),
+                    patch.object(common, "ResourceMonitor") as monitor,
+                ):
+                    monitor.return_value.finish.return_value = {"samples": []}
+                    with redirect_stderr(stream):
+                        self.assertEqual(common.run_worker(job, fail), 2)
+            self.assertIn("Setup failed during model_initialization", stream.getvalue())
+            self.assertIn("[REDACTED]", stream.getvalue())
+            self.assertNotIn("private-test-key", stream.getvalue())
+            path = next(Path(temporary).glob("startup-error-*.json"))
+            failure = json.loads(path.read_text())
+            self.assertEqual(failure["phase"], "model_initialization")
+            self.assertIn("RuntimeError", failure["traceback"])
+            self.assertNotIn("private-test-key", path.read_text())
+            trial = json.loads(common.trial_path(job, job["tasks"][0]).read_text())
+            self.assertEqual(trial["startup_record"], path.name)
+            self.assertEqual(trial["status"], "setup_error")
+
     def test_premium_hook_preserves_native_preprocessing_and_word_output(self):
         from run_premium import PremiumBackend
 

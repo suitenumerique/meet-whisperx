@@ -17,6 +17,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import traceback
 import uuid
 
 
@@ -67,13 +68,16 @@ def fingerprint(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
 
 
-def error_text(exc):
-    message = f"{type(exc).__name__}: {exc}"
+def redact_secrets(message):
     for name in ("HF_TOKEN", "API_KEY", "PYA_JOBS_KEY", "PYA_DOWNLOAD_KEY"):
         secret = os.environ.get(name)
         if secret:
             message = message.replace(secret, "[REDACTED]")
     return message
+
+
+def error_text(exc):
+    return redact_secrets(f"{type(exc).__name__}: {exc}")
 
 
 def manifest(data_dir, output_dir, limit=None):
@@ -431,12 +435,20 @@ def run_worker(job, factory):
     startup_path = Path(job["directory"]) / f"startup-{attempt}.json"
     backend = None
     info = {}
+    phase = "environment"
+    warmup_file = None
     try:
         info = environment()
+        phase = "resource_monitor"
         monitor = ResourceMonitor(info["gpu"]["uuid"], job["sample_interval_s"])
         monitor.start()
         clock = Clock(torch.cuda.synchronize)
         clock.start()
+        phase = "model_initialization"
+        print(
+            f"Loading {job['pipeline']} models (batch={job['config']['batch_size']})",
+            flush=True,
+        )
         try:
             backend = factory(job["config"])
         finally:
@@ -455,7 +467,10 @@ def run_worker(job, factory):
             },
         )
         # Warm every new worker; include native STT lazy initialization here.
+        phase = "warmup"
         for entry in job["files"][: job["warmup_files"]]:
+            warmup_file = entry["relative_path"]
+            print(f"Warming up: {warmup_file}", flush=True)
             warm_clock = Clock(torch.cuda.synchronize)
             warm_clock.start()
             backend.transcribe(
@@ -464,12 +479,23 @@ def run_worker(job, factory):
             warm_clock.stop()
     except Exception as exc:
         failure = error_text(exc)
+        details = redact_secrets(traceback.format_exc())
+        failure_path = startup_path.with_name(f"startup-error-{attempt}.json")
         write_json(
-            startup_path.with_name(f"startup-error-{attempt}.json"),
+            failure_path,
             {
                 "record_type": "startup_error",
                 "error": failure,
+                "phase": phase,
+                "warmup_file": warmup_file,
+                "traceback": details,
             },
+        )
+        print(
+            f"Setup failed during {phase} (batch={job['config']['batch_size']}): "
+            f"{failure}\nDetails: {failure_path}\n{details}",
+            file=sys.stderr,
+            flush=True,
         )
         for task in job["tasks"]:
             result = result_base(job, task)
@@ -478,7 +504,8 @@ def run_worker(job, factory):
                 error=failure,
                 environment=info,
                 backend=getattr(backend, "details", {}),
-                startup_record=startup_path.name,
+                startup_record=failure_path.name,
+                failure_phase=phase,
             )
             write_json(trial_path(job, task), result)
         return 2
@@ -498,6 +525,7 @@ def run_worker(job, factory):
         clock = Clock(torch.cuda.synchronize)
         monitor = ResourceMonitor(info["gpu"]["uuid"], job["sample_interval_s"])
         error = None
+        failure_traceback = None
         try:
             monitor.start()
             clock.start()
@@ -518,7 +546,8 @@ def run_worker(job, factory):
             result["status"] = "success"
         except Exception as exc:
             error = error_text(exc)
-            result.update(status="error", error=error)
+            failure_traceback = redact_secrets(traceback.format_exc())
+            result.update(status="error", error=error, traceback=failure_traceback)
         result.update(total_s=clock.duration, stages=clock.events)
         if clock.duration and result["status"] == "success":
             result["real_time_factor"] = clock.duration / task["file"]["duration_s"]
@@ -530,7 +559,10 @@ def run_worker(job, factory):
             result.pop("output", None)
             result.pop("raw_output", None)
             error = error_text(exc)
-            result.update(status="output_error", error=error)
+            failure_traceback = redact_secrets(traceback.format_exc())
+            result.update(
+                status="output_error", error=error, traceback=failure_traceback
+            )
             write_json(destination, result)
         print(
             f"{result['status']}: {task['file']['relative_path']} "
@@ -539,6 +571,11 @@ def run_worker(job, factory):
             flush=True,
         )
         if error:
+            print(
+                f"{error}\nDetails: {destination}\n{failure_traceback}",
+                file=sys.stderr,
+                flush=True,
+            )
             return 2  # no further trials in a possibly poisoned CUDA context
     backend.close()
     return 0
