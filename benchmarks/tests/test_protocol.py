@@ -90,7 +90,7 @@ class ProtocolTests(unittest.TestCase):
             turn_spacing_duration = 0.15
 
         class FasterWhisperSTT(STT):
-            def __init__(self, model_name="large-v2"):
+            def __init__(self, model_name="pyannoteAI/faster-whisper-large-v3-turbo"):
                 self_test.assertEqual(model_name, "Systran/faster-whisper-large-v2")
                 self.model_name = model_name
 
@@ -131,6 +131,30 @@ class ProtocolTests(unittest.TestCase):
         with patch.dict(
             sys.modules, {"pyannoteai.local": local, "pyannoteai.stt": stt_module}
         ):
+            description = PremiumBackend.describe({"stt_kwargs": {}})
+            self.assertIn(
+                "pyannoteAI/faster-whisper-large-v3-turbo",
+                description["FasterWhisperSTT"],
+            )
+            self.assertEqual(
+                description["resolved_stt_kwargs"],
+                {"model_name": "Systran/faster-whisper-large-v2"},
+            )
+            from common import main
+            from io import StringIO
+            from contextlib import redirect_stdout
+
+            for extra, expected in (
+                ([], "Systran/faster-whisper-large-v2"),
+                (["--stt-model", "custom/model"], "custom/model"),
+            ):
+                stream = StringIO()
+                with patch.object(
+                    sys, "argv", ["run_premium.py", "--describe-backend", *extra]
+                ):
+                    with redirect_stdout(stream):
+                        main("premium", PremiumBackend)
+                self.assertEqual(json.loads(stream.getvalue())["stt_model"], expected)
             with patch.dict(os.environ, {"PYA_JOBS_KEY": "test"}):
                 backend = PremiumBackend(
                     {"batch_size": 8, "mode": "accuracy", "stt_kwargs": {}}

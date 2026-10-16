@@ -569,6 +569,11 @@ def main(pipeline, factory):
         )
         parser.add_argument("--stt-kwargs", type=json.loads, default={})
         parser.add_argument(
+            "--describe-backend",
+            action="store_true",
+            help="Show SDK signatures and resolved STT configuration without running inference",
+        )
+        parser.add_argument(
             "--stt-model",
             default="Systran/faster-whisper-large-v2",
             help="FasterWhisperSTT model ID/path (default: %(default)s)",
@@ -598,6 +603,16 @@ def main(pipeline, factory):
         )
     if pipeline == "premium" and not isinstance(args.stt_kwargs, dict):
         parser.error("--stt-kwargs must be a JSON object")
+    stt_config = {}
+    if pipeline == "premium":
+        stt_config = {
+            "stt_kwargs": args.stt_kwargs,
+            "stt_model": args.stt_model,
+            "stt_model_parameter": args.stt_model_parameter,
+        }
+        if args.describe_backend:
+            print(json.dumps(factory.describe(stt_config), indent=2))
+            return
     data_dir, output_dir = args.data_dir.resolve(), args.output_dir.resolve()
     files = manifest(data_dir, output_dir, args.limit)
     if args.warmup_files > len(files):
@@ -631,12 +646,7 @@ def main(pipeline, factory):
             if pipeline == "repo":
                 config["language"] = args.language
             else:
-                config.update(
-                    mode=mode,
-                    stt_kwargs=args.stt_kwargs,
-                    stt_model=args.stt_model,
-                    stt_model_parameter=args.stt_model_parameter,
-                )
+                config.update(mode=mode, **stt_config)
             config_id = fingerprint(config)[:16]
             job = {
                 "run_id": run_id,

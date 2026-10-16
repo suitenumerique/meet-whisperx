@@ -92,6 +92,9 @@ The supplied docs do not specify the STT constructor's model keyword. The runner
 inspects the installed signature to resolve it and records the resolved keyword
 and model in each JSON. If it cannot identify it, it fails before loading models;
 inspect `--describe-backend` and pass `--stt-model-parameter <keyword>` as needed.
+`--describe-backend` displays both the SDK's unchanged signature/defaults and the
+runner's `stt_model` / `resolved_stt_kwargs`; the latter show what the benchmark
+will actually pass. It also respects `--stt-model` and `--stt-kwargs` overrides.
 Other constructor options can be passed via `--stt-kwargs '{...}'`; an explicit
 model keyword in that object takes precedence over `--stt-model`. Unsupported
 arguments fail explicitly. Precision and all other unspecified options retain

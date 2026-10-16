@@ -1,9 +1,7 @@
 """Benchmark pyannote.ai's native Pipeline.transcribe with FasterWhisperSTT."""
 
 import inspect
-import json
 import os
-import sys
 
 from common import main
 
@@ -44,6 +42,26 @@ def stt_options(constructor, config):
 
 
 class PremiumBackend:
+    @staticmethod
+    def describe(config):
+        from pyannoteai.stt import FasterWhisperSTT
+
+        description = {
+            "FasterWhisperSTT": str(inspect.signature(FasterWhisperSTT)),
+            "apply": str(inspect.signature(FasterWhisperSTT.apply)),
+        }
+        try:
+            kwargs, parameter = stt_options(FasterWhisperSTT, config)
+        except TypeError as exc:
+            description["configuration_error"] = str(exc)
+        else:
+            description.update(
+                stt_model=kwargs[parameter],
+                stt_model_parameter=parameter,
+                resolved_stt_kwargs=kwargs,
+            )
+        return description
+
     def __init__(self, config):
         from pyannoteai.local import Pipeline
         from pyannoteai.stt import FasterWhisperSTT, STT
@@ -128,17 +146,4 @@ class PremiumBackend:
 
 
 if __name__ == "__main__":
-    if "--describe-backend" in sys.argv:
-        from pyannoteai.stt import FasterWhisperSTT
-
-        print(
-            json.dumps(
-                {
-                    "FasterWhisperSTT": str(inspect.signature(FasterWhisperSTT)),
-                    "apply": str(inspect.signature(FasterWhisperSTT.apply)),
-                },
-                indent=2,
-            )
-        )
-    else:
-        main("premium", PremiumBackend)
+    main("premium", PremiumBackend)
