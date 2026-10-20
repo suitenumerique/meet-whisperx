@@ -14,6 +14,8 @@ export PYA_DOWNLOAD_KEY='your-download-key'
 uv pip install --python pyanote/.venv/bin/python \
   --extra-index-url "https://${PYA_DOWNLOAD_KEY}@download.pyannote.ai" \
   -r pyanote/requirements.txt
+uv pip install --python pyanote/.venv/bin/python \
+  requests
 ```
 
 ## Run
@@ -21,6 +23,9 @@ uv pip install --python pyanote/.venv/bin/python \
 Use a separate API key with **Run jobs** permission:
 
 ```bash
+export HF_TOKEN='HF_token'
+export HF_HOME=/data/models
+mkdir /data
 export PYA_JOBS_KEY='your-jobs-key'
 
 pyanote/.venv/bin/python pyanote/transcribe.py \
