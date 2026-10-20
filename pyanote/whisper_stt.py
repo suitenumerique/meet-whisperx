@@ -33,7 +33,7 @@ class BatchedWhisperSTT(STT):
         # Faster Whisper handle chunking. pyannote has resampled it to mono.
         waveform = file["waveform"].squeeze(0).cpu().numpy()
         segments, _ = self._batched.transcribe(
-            waveform, batch_size=self.batch_size, word_timestamps=True, vad_filter=True
+            waveform, batch_size=self.batch_size, word_timestamps=True, vad_filter=False
         )
         # Inference is lazy: consume all segments before logging completion.
         words = [
